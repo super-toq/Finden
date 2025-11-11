@@ -1,0 +1,5 @@
+/usr/bin/free.toq.finden
+/usr/local/share/locale/en_US/LC_MESSAGES/free.toq.finden.mo
+/usr/local/share/locale/pl_PL/LC_MESSAGES/free.toq.finden.mo
+/usr/local/share/icons/hicolor/scalable/apps/free.toq.finden.svg
+/usr/local/share/applications/free.toq.finden.desktop

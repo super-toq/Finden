@@ -1,10 +1,10 @@
-## finden
+## Finden
 A small Gnome desktop application to find items on your computer that you are looking for.
 
 ![finden](finden_img1.png?raw=true) 
 
 
-### Preconditions and dev. depentencies:
+### Preconditions and Dev Depentencies:
 
 #### Ubuntu/Debian:
 `sudo apt-get install libglib2.0-dev libgtk-4-dev libadwaita-1-dev`
@@ -17,15 +17,17 @@ A small Gnome desktop application to find items on your computer that you are lo
 
 
 ### Installation:
-1. `git clone https://github.com/super-toq/finden.git`
-2. `cd finden`
+1. `git clone https://github.com/super-toq/Finden.git`
+2. `cd Finden`
 3. `meson setup finden`
 4. `ninja -C finden`
 5. `sudo ninja -C finden install`
 
 ### Uninstall:
-1. `cd finden` ### in the folder from git clone
-2. `./uninstall.sh`
+Go to the download folder from git clone: 
+`cd Finden` 
+and run:
+`./uninstall.sh`
 
 
 **Please note**:
