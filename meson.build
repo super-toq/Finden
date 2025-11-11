@@ -36,6 +36,8 @@ executable('free.toq.finden',
  install     : true, 
  install_dir : join_paths(get_option('prefix'), 'bin')
 )
+# Sub - Miniterm Path
+subdir('src/miniterm')
 
 # Install Icon (App ID)
 install_data(join_paths(data_dir, 'free.toq.finden.svg'),

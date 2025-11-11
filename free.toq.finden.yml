@@ -9,6 +9,7 @@ finish-args:
   - --socket=fallback-x11
   - --socket=wayland
   - --filesystem=host
+  - --filesystem=/usr/bin:ro
   - --talk-name=org.freedesktop.Flatpak
   - --device=dri
 
