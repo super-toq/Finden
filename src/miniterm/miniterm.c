@@ -25,11 +25,11 @@ static GtkTextTag *dark_theme_tag  = NULL;
 /* Funktionsprototypen … */
 static void   on_entry_activate          (GtkEntry *entry,
                                           gpointer  user_data);
-static gboolean on_key_pressed            (GtkEventControllerKey *controller,
+/*static gboolean on_key_pressed            (GtkEventControllerKey *controller,
                                           guint keyval,
                                           guint keycode,
                                           GdkModifierType state,
-                                          gpointer user_data);
+                                          gpointer user_data); */
 static void   on_color_scheme_changed    (AdwStyleManager *manager,
                                           GParamSpec *pspec,
                                           gpointer user_data);
@@ -182,21 +182,21 @@ on_entry_activate (GtkEntry *entry, gpointer user_data)
     gtk_editable_set_text (GTK_EDITABLE (entry), "");
 }
 /* ---------- Tastatur‑Callback ---------- */
-static gboolean
-on_key_pressed (GtkEventControllerKey *controller,
-                guint keyval,
-                guint keycode,
-                GdkModifierType state,
-                gpointer user_data)
-{
-    GtkTextView *view = GTK_TEXT_VIEW (user_data);
+//static gboolean
+//on_key_pressed (GtkEventControllerKey *controller,
+//                guint keyval,
+//                guint keycode,
+//                GdkModifierType state,
+//                gpointer user_data)
+//{
+//    GtkTextView *view = GTK_TEXT_VIEW (user_data);
 
-    if (keyval == GDK_KEY_Return) {
-        append_text (view, "Enter gedrückt");
-        return TRUE;   /* Event verarbeitet */
-    }
-    return FALSE;      /* Weiterreichen */
-}
+//    if (keyval == GDK_KEY_Return) {
+//        append_text (view, "Enter gedrückt");
+//        return TRUE;   /* Event verarbeitet */
+//    }
+//    return FALSE;      /* Weiterreichen */
+//}
 
 /* ----- Funktion zum Verarbeiten von Kommandozeilenargumenten ----- */
 static int
@@ -382,9 +382,9 @@ main (int argc, char **argv)
 {
     adw_init ();   /* vor Gtk Anwendung */
 
-    GtkApplication *app = 
-      gtk_application_new ("free.toq.miniterm", G_APPLICATION_HANDLES_COMMAND_LINE);
-//      gtk_application_new(NULL, 0); // test flatpak
+    GtkApplication *app = gtk_application_new (
+        "free.toq.miniterm",
+        G_APPLICATION_HANDLES_COMMAND_LINE);
 
     if (!app) {
         g_printerr ("Fehler: Konnte GtkApplication nicht erstellen\n");

@@ -8,7 +8,7 @@
  * Please note:
  * The Use of this code and execution of the applications is at your own risk, I accept no liability!
  *
- * Version 0.6
+ * Version 0.6.5
  */
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -70,7 +70,7 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     AdwAboutDialog *about = ADW_ABOUT_DIALOG (adw_about_dialog_new ());
     //adw_about_dialog_set_body(about, "Hierbei handelt es sich um ein klitzekleines Testprojekt."); //nicht in meiner adw Version?
     adw_about_dialog_set_application_name (about, "Finden");
-    adw_about_dialog_set_version (about, "0.6");
+    adw_about_dialog_set_version (about, "0.6.5");
     adw_about_dialog_set_developer_name (about, "toq (super-toq)");
     adw_about_dialog_set_website (about, "https://github.com/super-toq");
 
@@ -218,11 +218,11 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
 
     if (g_file_test (mini_path, G_FILE_TEST_IS_EXECUTABLE)) {
         term_path = g_strdup (mini_path);
-        term_name = "miniterm";
+        term_name = "free.toq.miniterm";
         g_print (_("%s gefunden in %s\n"), term_name, term_path);
     } else {
         static const gchar *terminals[] = {
-            "miniterm",
+            "free.toq.miniterm",
             "konsole",
             "gnome-terminal",
             "kgx",
@@ -427,22 +427,23 @@ int main (int argc, char **argv)
 {
     char *app_dir = g_get_current_dir();  // Ermit. den aktuellen Arbeitsverzeichnis-Pfad
     const char *locale_path = NULL;
+    const char *flatpak_id = getenv("FLATPAK_ID"); //flatpak string free.toq.finden anderenfalls NULL !
 
     /* Resource‑Bundle (finden.gresource) registrieren um den Inhalt verfügbar zu machen */
     //g_resources_register (resources_get_resource ());
 
-    /* ----- Erstelle den Pfad zu den locale-Dateien ----- */
+    /* ----- Erstelle den Pfad zu den locale-Dateien ----------------------------------- */
     setlocale(LC_ALL, "");
     textdomain("toq-finden");
     bind_textdomain_codeset("toq-finden", "UTF-8"); // Basisverzeichnis für Übersetzungen
-    if (getenv("FLATPAK_ID")) {
+    if (flatpak_id != NULL && flatpak_id[0] != '\0')  // Wenn ungleich NULL:
+    {
         locale_path = "/app/share/locale"; // Flatpakumgebung /app/share/locale
     } else {
         locale_path = "/usr/share/locale"; // Native Hostumgebung /usr/share/locale
     }
     bindtextdomain("toq-finden", locale_path);
     g_print (_("Lokalisierung in: %s \n"), locale_path); // testen
-//    g_print (_("App directory.: %s \n"), app_dir);       // testen
 
     g_autoptr (AdwApplication) app =                        // Instanz erstellen + App-ID + Default-Flags;
         adw_application_new ("free.toq.finden", G_APPLICATION_DEFAULT_FLAGS);

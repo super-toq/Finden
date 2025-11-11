@@ -52,9 +52,9 @@ install_data(join_paths(data_dir, 'free.toq.finden.desktop.download'),
 # EN 
 po_file_en = join_paths(po_dir, 'toq-finden_en_US.po')
 mo_file = 'toq-finden.mo'
-run_command('msgfmt', po_file_en, '--output-file=' + 'top-finden_en_US.mo', check : true)
+run_command('msgfmt', po_file_en, '--output-file=' + 'toq-finden_en_US.mo', check : true)
 
-install_data(mo_file,
+install_data('toq-finden_en_US.mo',
  install_dir: join_paths(get_option('prefix'), 'share', 'locale', 'en_US', 'LC_MESSAGES'),
  rename     : mo_file)
 
