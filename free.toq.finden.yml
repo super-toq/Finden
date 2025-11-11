@@ -1,0 +1,20 @@
+app-id: free.toq.finden
+runtime: org.gnome.Platform
+runtime-version: '49'
+sdk: org.gnome.Sdk
+command: free.toq.finden
+
+finish-args:
+  - --share=network
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --filesystem=host
+  - --talk-name=org.freedesktop.Flatpak
+  - --device=dri
+
+modules:
+  - name: free.toq.finden
+    buildsystem: meson
+    sources:
+      - type: dir
+        path: .
