@@ -107,12 +107,10 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
 //    adw_about_dialog_set_translator_credits (about, "toq: deutsch\n toq: englisch");
     adw_about_dialog_set_application_icon (about, "free.toq.finden");   //IconName
 
-        /* Dialog innerhalb (modal) zum aktiven Fenster zeigen */
-//      adw_dialog_present (ADW_DIALOG (about), NULL);
-
-        /* Dialog innerhalb (modal) zum aktiven Fenster zeigen */
-//    GtkWindow *parent = gtk_application_get_active_window (GTK_APPLICATION (app));
-//    adw_dialog_present (ADW_DIALOG (about), GTK_WIDGET (parent));
+    /* Dialog innerhalb (modal) des Haupt-Fensters anzeigen */
+    GtkWindow *parent = GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(
+    gtk_application_get_active_window(GTK_APPLICATION(app)) )));
+    adw_dialog_present(ADW_DIALOG(about), GTK_WIDGET(parent));
 
 }
 
