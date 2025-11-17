@@ -449,7 +449,7 @@ int main (int argc, char **argv)
     g_print (_("Lokalisierung in: %s \n"), locale_path); // testen
 
     g_autoptr (AdwApplication) app =                        // Instanz erstellen + App-ID + Default-Flags;
-        adw_application_new ("free.toq.finden", G_APPLICATION_DEFAULT_FLAGS);
+        adw_application_new ("free.toq.finden_0.6.5", G_APPLICATION_DEFAULT_FLAGS);
 
     g_signal_connect (app, "activate", G_CALLBACK (on_activate), NULL); // Signal mit on_activate verbinden
     /* --- g_application_run startet Anwendung u. wartet auf Ereignis --- */
