@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <!-- APP_ID -->
+  <gresource prefix="/free/toq/finden">
+    <file alias="icon1">icon1.svg</file>
+    <file alias="smiley1">smiley1.svg</file>
+  </gresource>
+</gresources>
+

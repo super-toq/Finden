@@ -1,5 +1,5 @@
 # meson.build
-# toq 2025.11.10
+# toq 2025.11.15
 # Project definition (App ID)
 project('free.toq.finden', 'c', version: '1.0.0', default_options: 
  [
@@ -13,12 +13,17 @@ project('free.toq.finden', 'c', version: '1.0.0', default_options:
 # Base structure
 src_dir  = 'src'
 data_dir = 'data'
-po_dir   = join_paths(src_dir, 'po')   # PO files
+icons_dir = join_paths(data_dir, 'icons') # Icons
+po_dir   = join_paths(src_dir, 'po')     # PO files
+
+# GResource XML definition
+gresource_xml = join_paths(data_dir, 'free.toq.finden.gresource.xml')
 
 # Dependencies
 glib_dep    = dependency('glib-2.0', required : true)
 gtk_dep     = dependency('gtk4', required : true)
 adwaita_dep = dependency('libadwaita-1', required : true)
+gnome = import('gnome')
 
 # Remove "unused" warnings, without code changes.
 add_project_arguments(
@@ -26,23 +31,31 @@ add_project_arguments(
  '-Wno-unused-parameter',
  '-Wno-missing-parameter-name',
  '-Wno-missing-field-initializers',
+ '-Wno-overlength-strings',
  language : 'c'
 )
 
+# Gen. ressources
+#resource = gnome.gresource(gresource_xml, 
+#  dependencies: [glib_dep],
+#  install: true
+#)
+
 # Build and install (App ID)
 executable('free.toq.finden',
- sources     : [join_paths(src_dir, 'main.c')],
+ sources     : [join_paths(src_dir, 'main.c'), 'src/free.toq.finden.gresource.c'],
  dependencies: [glib_dep, gtk_dep, adwaita_dep],
  install     : true, 
  install_dir : join_paths(get_option('prefix'), 'bin')
 )
+
 # Sub - Miniterm Path
 subdir('src/miniterm')
 
 # Install Icon (App ID)
-install_data(join_paths(data_dir, 'free.toq.finden.svg'),
+install_data(join_paths(icons_dir, 'free.toq.finden.svg'),
  install_dir : join_paths(get_option('prefix'), 'share', 'icons', 'hicolor', 'scalable', 'apps'))
-install_data(join_paths(data_dir, 'free.toq.miniterm.svg'),
+install_data(join_paths(icons_dir, 'free.toq.miniterm.svg'),
  install_dir : join_paths(get_option('prefix'), 'share', 'icons', 'hicolor', 'scalable', 'apps'))
 
 # Install .desktop file (App ID)

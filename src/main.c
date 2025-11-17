@@ -3,25 +3,72 @@
  *
  *
  *
- * gcc $(pkg-config --cflags gtk4 libadwaita-1) -o finden main.c $(pkg-config --libs gtk4 libadwaita-1)
+ * gcc $(pkg-config --cflags gtk4 libadwaita-1) -o finden main.c free.toq.finden.gresource.c $(pkg-config --libs gtk4 libadwaita-1)
  *
  * Please note:
  * The Use of this code and execution of the applications is at your own risk, I accept no liability!
  *
- * Version 0.6.5
+ * Version 0.7.5
  */
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <adwaita.h>
+#include "icon-gresource.h" // binäre Icons
 #include <locale.h> 
 #include <glib/gi18n.h>
-//#include "finden.gresource.h"   /* enthält resources_get_resource() */
-
-/* globale Referenz, wird beim UI-Aufbau gesetzt */
-static GtkCheckButton *root_check = NULL;
-static gboolean dialog_finished = FALSE;
 
 
+/* --- globale Referenzen --- */
+static char   *app_dir    = NULL;     // Ermit. den aktuellen Arbeitsverzeichnis-Pfad
+static gchar *glob_term_path = NULL;  // /erminal Pfad global ermittelt
+static const gchar *glob_term_name = NULL; // term. Name ...
+static const char *flatpak_id  = NULL;  
+static gboolean    is_flatpak = FALSE; // 1 oder 0 ausgeben
+
+
+/* ---------- Initialisierungsfunktion ---------- */
+static void init_environment(void)
+{
+flatpak_id = getenv("FLATPAK_ID"); //siehe G.Ref.
+is_flatpak = (flatpak_id != NULL && flatpak_id[0] != '\0');
+//is_flatpak = 1; // zum Testen des Verhaltens einer Flatpak App
+
+    /* Pfad zum eigenen Executable Verzeichnis */
+    gchar *exe_path = g_file_read_link("/proc/self/exe", NULL);
+    if (!exe_path) {
+        g_warning(_("Der exe_path kann nicht erstellt werden.\n"));
+        app_dir = NULL;
+        return;
+    }
+    /* Eigenen Pfad ermitteln: */
+    app_dir = g_path_get_dirname(exe_path); // =Global
+    g_print ("Anwendungspfad: %s \n", app_dir);
+    g_free(exe_path);
+}
+
+/* ---------- miniterm suchen ------------------- */
+static void find_miniterm(void)
+{
+ /* Abbruch, falls init_environment fehlschlägt */
+if (!app_dir) {g_warning (_("[G] Abbruch, Variable 'app_dir' wurde nicht gesetzt!\n")); return;}   
+
+ /* 1. Pfad zu miniterm im selben Verzeichnis suchen */
+    gchar *miniterm_path = g_build_filename(app_dir, "free.toq.miniterm", NULL);
+    g_print ("miniterm in Umgebung gefunden: %s \n", miniterm_path); // testen
+    g_free(app_dir);
+
+
+    /* 2. Prüfen, ob miniterm existiert und ausführbar ist */
+    if (g_file_test(miniterm_path, G_FILE_TEST_IS_EXECUTABLE)) {
+        glob_term_path = g_strdup(miniterm_path);
+        glob_term_name = "free.toq.miniterm";
+        g_print(_(" %s gefunden in %s\n"), glob_term_name, glob_term_path);
+        g_free(miniterm_path);
+        return;                     // miniterm gefunden
+    }
+
+    g_free(miniterm_path); 
+}
 /* ----- Message / Alert-Dialog Generisch,  show_alert_dialog (parent,*Titel, *Inhalttext) ----- */
 static void on_alert_dialog_response (AdwAlertDialog *dialog,
                           const char     *response,
@@ -32,7 +79,7 @@ static void on_alert_dialog_response (AdwAlertDialog *dialog,
     else
         g_print ("Dialog btn - cancel\n");
 
-    /* **Wichtig:** hier kein g_object_unref(dialog) ! */
+    /* Hinweis, hier kein g_object_unref(dialog)! */
 }
 
 /* ----- Callback Alert-Dialog anzeigen (generisch) ----- */
@@ -42,7 +89,7 @@ show_alert_dialog (GtkWindow   *parent,
                    const char  *body)
 {
     if (!parent || !GTK_IS_WINDOW (parent)) {
-        g_warning (_("Kein gültiges Elternfenster für Alert-Dialog"));
+        g_warning (_("Kein gültiges Elternfenster für Alert-Dialog.\n"));
         return;
     }
 
@@ -70,7 +117,7 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     AdwAboutDialog *about = ADW_ABOUT_DIALOG (adw_about_dialog_new ());
     //adw_about_dialog_set_body(about, "Hierbei handelt es sich um ein klitzekleines Testprojekt."); //nicht in meiner adw Version?
     adw_about_dialog_set_application_name (about, "Finden");
-    adw_about_dialog_set_version (about, "0.6.5");
+    adw_about_dialog_set_version (about, "0.7.5");
     adw_about_dialog_set_developer_name (about, "toq (super-toq)");
     adw_about_dialog_set_website (about, "https://github.com/super-toq");
 
@@ -111,13 +158,48 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     GtkWindow *parent = GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(
     gtk_application_get_active_window(GTK_APPLICATION(app)) )));
     adw_dialog_present(ADW_DIALOG(about), GTK_WIDGET(parent));
+}//Ende About-Dialog
 
+/* ---- "find"-Kommando zusammenbauen - 
+     Außerhalb von on_search_button_clicked, da sonst "nested-functions" innerhalb einer Funktion ensteht! */
+    
+gchar *find_cmd = NULL;
+
+    /* 5.1  find Kommando:   ([A] ohne Root, nur im Homeverzeichnis)  */
+static void action_A(const char *find_path, const char *query) { // find_path u. query als Argumente bekommen.
+    find_cmd = g_strdup_printf("%s %s -iname \"*%s*\"", 
+       find_path, g_get_home_dir(), query); 
+                 /* g_get_home_dir() ist Funktion aus GLib, welche direkt
+                    hier innerhalb dieser Funktion eine Zeichenkette in "const gchar" ermittelt. */
 }
 
+    /* 5.2  find Kommando:   ([B] Root ohne Sanpashots)  */
+static void action_B(const char *find_path, const char *query) { // find_path u. query als Argumente bekommen.
+    find_cmd = g_strdup_printf(
+        "run0 --background=0 --unit=finden --via-shell %s / -path \"/.snapshots\" -prune -o -iname \"*%s*\"",
+        find_path, query); 
+}
+        
+    /* 5.3  find Kommando:   ([C] Root + Snapshots)  */
+static void action_C(const char *find_path, const char *query) { // find_path u. query als Argumente bekommen.
+    find_cmd = g_strdup_printf(
+        "run0 --background=0 --unit=finden --via-shell %s / -iname \"*%s*\"", 
+        find_path, query); 
+}
+
+
 /* ----- Callback Beenden-Button ----- */
-static void on_quitbtn_clicked (GtkButton *button, gpointer user_data)
-{
-    g_application_quit (G_APPLICATION (user_data));
+static void on_quitbtn_clicked(GtkButton *button, gpointer user_data) 
+    { 
+    GtkWindow *win = GTK_WINDOW(user_data);
+    gtk_window_destroy(win);
+    }
+
+/* ----- Callback für Kontrollkästchen damit Suchleiste wieder Fokus erhält ----- */
+void on_check_button_toggled(GtkToggleButton *toggle_button, gpointer user_data) {
+    
+    GtkWidget *search_entry = GTK_WIDGET(user_data);
+    gtk_widget_grab_focus(search_entry); // Setze den Fokus auf das Suchfeld
 }
 
 /* ----- Callback Suchfunktion ausführen | Hauptfunktion --------------------------------- */
@@ -127,9 +209,21 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
     const gchar *query = gtk_editable_get_text (GTK_EDITABLE (search_entry));
 
     if (!query || *query == '\0') {
-        g_warning (_("Bitte einen Suchbegriff eingeben."));
+        g_print (_("Bitte einen Suchbegriff eingeben.\n"));
         return;
     }
+
+    /* 0. ---- Struktur dient für "Schalter" ---- */
+    typedef enum 
+    {
+        ROOT_OFF = 0,
+        FLATPAK_DISABLE,
+        ROOT_NO_RUN0,
+        ROOT_RUN0_OK,
+        ROOT_RUN0_SNAPSHOTS_OK
+    } 
+    RootMode;
+    RootMode mode = ROOT_OFF;
 
     /* 1. ---- Tool-"find"‑ermitteln ---------------------------------------------------- */
     const gchar *find_prog = "find";
@@ -140,94 +234,144 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
             find_path = g_strdup (fallback);
     }
     if (!find_path) {
-        g_warning (_("Abbruch, Tool %s wurde nicht gefunden!"), find_prog);
+        g_warning (_("Abbruch, Tool %s wurde nicht gefunden!\n"), find_prog);
+        // Alert-Dialog noch einfügen !!!
         return;
     }
 
-    /* 2. ---- Prüfen, ob die Root‑Checkbox aktiv ist ----------------------------------- */
+    /* 2.0 ---- Checkboxen Deklaration vor Prüfung -----------------------------------------*/
+    GtkCheckButton *root_check = GTK_CHECK_BUTTON(g_object_get_data(G_OBJECT(button), "root_check"));
+    GtkCheckButton *snapshots_check = GTK_CHECK_BUTTON(g_object_get_data(G_OBJECT(button), "snapshots_check"));
+
+    /* 2.1 ---- Prüfen, ob die Checkboxen aktiviert ---- */
     gboolean root_active = FALSE;
-    if (GTK_IS_CHECK_BUTTON (root_check))
-        root_active = gtk_check_button_get_active (root_check);
-    g_print (_("Root-Schalter %s\n"), root_active ? _("aktiviert") : _("nicht aktiviert"));
+    if (GTK_IS_CHECK_BUTTON(root_check))
+        root_active = gtk_check_button_get_active(root_check);
 
-    /* 3. ---- Wenn Checkbox Root aktiviert wurde, führe nächsten Schritt aus, anderenfalls... */
-    if (root_active) 
+    gboolean snapshots_active = FALSE;
+    if (GTK_IS_CHECK_BUTTON(snapshots_check))
+        snapshots_active = gtk_check_button_get_active(snapshots_check);
+
+    /* 2.2 ---- Debug-Ausgaben ------------------------ */
+    g_print(_("Root-Schalter %s\n"),
+        root_active ? _("aktiviert") : _("nicht aktiviert"));
+
+    g_print(_("Snapshots-Schalter %s\n"),
+        snapshots_active ? _("aktiviert") : _("nicht aktiviert"));
+
+    /* 3.0 ---- Modus bestimmen ----------------------  */
+    if (!root_active) {
+        /* 3.1  ROOT= 0 */
+        mode = ROOT_OFF;
+    }
+    else if (is_flatpak) {
+        /* 3.2  App= Flatpak, alles deaktivieren  */
+        mode = FLATPAK_DISABLE;
+    }
+    else if (!g_file_test("/usr/bin/systemd-run", G_FILE_TEST_EXISTS)) {
+        /* 3.3  ROOT=1, RUN0=0 */
+        mode = ROOT_NO_RUN0;
+    }
+    else if (!snapshots_active) {
+        /* 3.4  ROOT=1, RUN0=1, SNAPSHOTS=0 */
+        mode = ROOT_RUN0_OK;
+    }
+    else {
+        /* 3.5  ROOT=1, RUN0=1, SNAPSHOTS=1 */
+        mode = ROOT_RUN0_SNAPSHOTS_OK;
+    }
+
+    /* ---- 4. Schalter aus 3.x - für ROOT, RUN0, SNAPSHOTS + Find-Kommande ---- */
+    void (*cmd_action)(const char *, const char *) = NULL; 
+    cmd_action = action_A; // Find-Kommando [A] wird in "static void action_A" definiert
+    // Diese Maßnahme war notwendig, da sonst nested-Fuction innerhalb einer Funktion entsteht!
+
+    switch (mode)
     {
-         /* 3.1. --- App ist Flatpak-Version ---- */
-         if (getenv("FLATPAK_ID")) 
-         {
-         /* --- ? --- */
+        case ROOT_OFF:  // ROOT=0
+            g_print("Suchefunktion wird nur im Homeverzeichnis durchgeführt.\n"); // testen
+            /* find Kommando [A] verwenden  */
+            cmd_action = action_A; // action_A wird in "static void action_A" definiert
+            break;
 
+        case FLATPAK_DISABLE: // FLATPAK=1 - Optionen deaktivieren
+        {    
+            g_print(_("Anwendung ist flatpak Version, Optionen sind deaktiviert.\n"));
+            
+            /* Checkboxen zurücksetzen und deaktivieren */
+            gtk_check_button_set_active(root_check, FALSE);
+            gtk_widget_set_sensitive(GTK_WIDGET(root_check), FALSE);
+            gtk_check_button_set_active(snapshots_check, FALSE);
+            gtk_widget_set_sensitive(GTK_WIDGET(snapshots_check), FALSE);
+            root_active = FALSE;
+            /* find Kommando [A] verwenden  */
+            cmd_action = action_A; // action_A wird in "static void action_A" definiert
+            break;
+        }
 
-         } else // App ist nicht Flatpak-Version, weiter mit 3.2
-          {
-             /* 3.2. ---- Prüfe, ob systemd-run0 existiert ----------------------------------------- */
-             if (!g_file_test ("/usr/bin/systemd-run", G_FILE_TEST_EXISTS)) 
-             {
-                 g_print(_("Service run0 ist nicht aktiv. Bitte überprüfen Sie Ihre Systemkonfiguration.\n"));
-                 gtk_check_button_set_active(root_check, FALSE);            // setze Checkbox auf unangeklickt
-                 gtk_widget_set_sensitive(GTK_WIDGET (root_check), FALSE);  // setze Checkbox auf deaktiviert
-                 root_active = FALSE;                                       // zuvor ermittelter Wert zurückgesetzt
-                 /* ---- Alert Dialog erzeugen ---- */
-                 GtkWindow *parent = GTK_WINDOW (gtk_widget_get_root (GTK_WIDGET (search_entry)));
-                 if (parent) 
-                  {
-                     show_alert_dialog (parent,
-                               _("Run0 nicht aktiviert"),
-                               _("Der Service Run0 ist nicht aktiv,\n"
-                                 "Bitte überprüfen Sie Ihre Systemkonfiguration.\n"));
-                  }
-              } 
-                else 
-                   {
-                      g_print (_("Service run0 vorhanden\n"));
-                   }
-           } // beendet aus else zu App ist Flatpak-Version
-    } else {
-    g_print("Placeholder(1) \n"); // Platzhalter
-    }
+        case ROOT_NO_RUN0: // ROOT=1, RUN0=0, somit auch keine Snapshots
+        {
+            g_print(_("Service run0 ist nicht aktiv.\n"));
 
-    /* 4. ---- Kommando für "find" zusammenbauen ---- */
-    gchar *find_cmd;
-    /* 4.1 - bei aktiver Root-Checkbox sowie Run0, benutze Kommando, anderenfalls 4.2 - */
-    if (root_active) {
-        find_cmd = g_strdup_printf ("run0 --background=0 --unit=finden --via-shell %s / -iname \"*%s*\"",
-                                    find_path,
-                                    query);
-    /* 4.2 ---- bei nicht aktiver "Root"-Checkbox folgendes Kommando benutzen ----------*/
-    } else {
-        find_cmd = g_strdup_printf ("%s %s -iname \"*%s*\"",
-                                    find_path, g_get_home_dir (), query);
-    }
-    /* 5. --- grep einbauen --- */
-     // grep hier einbauen !!!!
+            /* Checkbox zurücksetzen */
+            gtk_check_button_set_active(root_check, FALSE);
+            gtk_widget_set_sensitive(GTK_WIDGET(root_check), FALSE);
+
+            /* ALert-Dialog aufrufen */
+            GtkWindow *parent = GTK_WINDOW (gtk_widget_get_root(GTK_WIDGET(search_entry)));
+            if (parent)
+            {
+                show_alert_dialog(parent, _("Run0 nicht aktiviert"),
+                                          _("Der Service Run0 ist nicht aktiv,\n"
+                                            "bitte überprüfen Sie Ihre Systemkonfiguration.\n"));
+            }
+            /* root_active manuell zurücksetzen */
+            root_active = FALSE;
+            /* find Kommando [A] verwenden  */
+            cmd_action = action_A; // action_A wird in "static void action_A" definiert
+            break;
+        }
+
+       case ROOT_RUN0_OK: // ROOT=1, RUN0=1, SNAPSHOTS=0
+            g_print(_("Service run0 vorhanden.\n"));
+            /* find Kommando [B] verwenden  */
+            cmd_action = action_B; // action_B wird in "static void action_B" definiert
+            break;
+
+       case ROOT_RUN0_SNAPSHOTS_OK: // ROOT=1, RUN0=1, SNAPSHOTS=1
+            g_print(_("Service run0 vorhanden.\nPfad für .snapshots aktiv.\n"));
+            /* find Kommando [C] verwenden  */
+            cmd_action = action_C; // action_C wird in "static void action_C" definiert
+    
+    } // Switch(mode) Ende
+
+    /* 5. ---- Aktion für das find-Kommando aufrufen ---- */
+    if (cmd_action) cmd_action(find_path, query);  // Aktion aufrufen
+ /* Hinweis - cmd_action beinhaltet:
+    action_A:
+    "/usr/bin/find ~/ -iname \"*<query>*\""
+  
+    action_B:
+    "run0 --background=0 --unit=finden --via-shell /usr/bin/find / -path \"/.snapshots\" -prune -o -iname \"*<query>*\""
+  
+    action_C:
+    "run0 --background=0 --unit=finden --via-shell /usr/bin/find / -iname \"*<query>*\""
+ */
 
     /* 6. ---- Terminal im System ermitteln ---- */
-    gchar *exe_path = g_file_read_link ("/proc/self/exe", NULL);
-    if (!exe_path) {
-        g_warning (_("Der exe_path kann nicht erstellt werden"));
-        g_free (find_cmd);
-        return;
-    }
-    gchar *app_dir = g_path_get_dirname (exe_path);
-    g_free (exe_path);
 
     /* Erstelle Pfad zu miniterm */
-    gchar *mini_path = g_build_filename (app_dir, "miniterm", NULL);
-    g_free (app_dir);
-
     gchar *term_path = NULL;
     const gchar *term_name = NULL;
 
-    if (g_file_test (mini_path, G_FILE_TEST_IS_EXECUTABLE)) {
-        term_path = g_strdup (mini_path);
-        term_name = "free.toq.miniterm";
-        g_print (_("%s gefunden in %s\n"), term_name, term_path);
+    if (glob_term_name && g_str_has_prefix(glob_term_name, "free.toq.miniterm")) {
+        g_print (_("[L1] %s gefunden in %s\n"), glob_term_name, glob_term_path);
+        term_path = glob_term_path;
     } else {
         static const gchar *terminals[] = {
             "free.toq.miniterm",
             "konsole",
-            "gnome-terminal",
+            "gnome-terminal2",
             "kgx",
             "xterm",
             "terminator",
@@ -238,15 +382,15 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
             term_path = g_find_program_in_path (terminals[i]);
             if (term_path) {
                 term_name = terminals[i];
-                g_print (_("%s gefunden in %s\n"), term_name, term_path);
+                g_print (_("[L2] %s gefunden in %s\n"), term_name, term_path);
                 break;
             }
         }
     }
-    g_free (mini_path);
+//    g_free (mini_path);
 
     if (!term_path) {
-        g_warning (_("Kein unterstütztes Terminal gefunden!"));
+        g_warning (_("Kein unterstütztes Terminal gefunden!\n"));
         GtkWindow *parent = GTK_WINDOW (gtk_widget_get_root (GTK_WIDGET (button)));
         if (parent)
             show_alert_dialog (parent,
@@ -287,37 +431,41 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
         g_free (argv[i]);
 
     /* term_path war entweder g_strdup(mini_path) oder Rückgabe von g_find_program_in_path() */
-    g_free (term_path);
+    /* term_path ist Ergebnis von g_find_program_in_path(), welches ein Zeiger auf glob_term_path hat!
+       Lösung zum Eigentum erlangen und anschließend leeren: */
+    term_path = g_strdup(term_path);
+    g_free (term_path); // < fehler
+    
 
     /* find_cmd und full_cmd einmalig freigeben (full_cmd wurde bereits durch argv-loop freigegeben!)*/
     g_free (find_cmd);  /* full_cmd) bereits via argv loop */
 
 }
 
-/* --------------------------------------------------------------------------- */
-/*       Aktivierungshandler                                                   */
-/* ----- CALLBACK-Funktion wird aufgerufen wenn Anwendung aktiviert wird ----- */
+/* -------------------------------------------------------------*/
+/*       Aktivierungshandler                                    */
+/* ----- CALLBACK-Funktion, wenn Anwendung aktiviert wird ----- */
 static void on_activate (AdwApplication *app, gpointer)
 {
     /* ----- Adwaita-Fenster ------------------------ */
-    AdwApplicationWindow *win = ADW_APPLICATION_WINDOW (adw_application_window_new (GTK_APPLICATION (app))); 
+    AdwApplicationWindow *adw_win = ADW_APPLICATION_WINDOW (adw_application_window_new (GTK_APPLICATION (app))); 
 
-    gtk_window_set_title (GTK_WINDOW(win), "Finden");   // Fenstertitel
-    gtk_window_set_default_size (GTK_WINDOW(win), 490, 260);  // Standard-Fenstergröße
-    gtk_window_present (GTK_WINDOW(win));                     // Fenster anzeigen lassen
+    gtk_window_set_title (GTK_WINDOW(adw_win), "Finden");         // Fenstertitel
+    gtk_window_set_default_size (GTK_WINDOW(adw_win), 480, 280);  // Standard-Fenstergröße
+    gtk_window_present (GTK_WINDOW(adw_win));                     // Fenster anzeigen lassen
 
     /* ----- ToolbarView (Root‑Widget) erstellt und als Inhalt des Fensters festgelegt -- */
     AdwToolbarView *toolbar_view = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
-    adw_application_window_set_content (win, GTK_WIDGET (toolbar_view));
+    adw_application_window_set_content (adw_win, GTK_WIDGET (toolbar_view));
 
     /* ----- HeaderBar mit TitelWidget erstellt und dem ToolbarView hinzugefügt ------------ */
     AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new());
     /* Label mit Pango‑Markup erzeugen */
     GtkLabel *title_label = GTK_LABEL(gtk_label_new (NULL));
-    gtk_label_set_markup (title_label, "<b>Finden</b>");                  // Fenstertitel in Markup
-    gtk_label_set_use_markup (title_label, TRUE);                        //Markup‑Parsing aktivieren
-    adw_header_bar_set_title_widget (header, GTK_WIDGET (title_label)); //Label als Title‑Widget einsetzen
-    adw_toolbar_view_add_top_bar (toolbar_view, GTK_WIDGET (header));  //Header‑Bar zur Toolbar‑View hinzuf
+    gtk_label_set_markup (title_label, "<b>Finden</b>");                // Fenstertitel in Markup
+    gtk_label_set_use_markup (title_label, TRUE);                       // Markup‑Parsing aktivieren
+    adw_header_bar_set_title_widget (header, GTK_WIDGET (title_label)); // Label als Title‑Widget einsetzen
+    adw_toolbar_view_add_top_bar (toolbar_view, GTK_WIDGET (header));   // Header‑Bar zur Toolbar‑View hinzuf
 
     /* --- Hamburger‑Button innerhalb der Headerbar --- */
     GtkMenuButton *menu_btn = GTK_MENU_BUTTON (gtk_menu_button_new ());
@@ -339,25 +487,38 @@ static void on_activate (AdwApplication *app, gpointer)
 
 
     /* ---- Haupt‑Box erstellen ----------------------------------------------------------- */
-    GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
-    gtk_widget_set_margin_top    (GTK_WIDGET (box), 20);
-    gtk_widget_set_margin_bottom (GTK_WIDGET (box), 20);
-    gtk_widget_set_margin_start  (GTK_WIDGET (box), 20);
-    gtk_widget_set_margin_end    (GTK_WIDGET (box), 20);
-    gtk_widget_set_hexpand (GTK_WIDGET (box), TRUE);
-    gtk_widget_set_vexpand (GTK_WIDGET (box), TRUE);
+    GtkBox *mainbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
+    gtk_widget_set_margin_top    (GTK_WIDGET (mainbox), 20);
+    gtk_widget_set_margin_bottom (GTK_WIDGET (mainbox), 20);
+    gtk_widget_set_margin_start  (GTK_WIDGET (mainbox), 20);
+    gtk_widget_set_margin_end    (GTK_WIDGET (mainbox), 20);
+    gtk_widget_set_hexpand (GTK_WIDGET (mainbox), TRUE);
+    gtk_widget_set_vexpand (GTK_WIDGET (mainbox), TRUE);
 
     /* ----- Text-Label erstellen  ----- */
-    GtkWidget *label = gtk_label_new(_("Finden statt Suchen 😉"));
-    gtk_widget_set_halign (label, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
+    GtkWidget *label1 = gtk_label_new(_("Finden statt Suchen"));
+    gtk_widget_set_halign (label1, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (label1, GTK_ALIGN_CENTER);
 
-    /* ----- Label als Inhalt zur hinzufügen ----- */ 
-    gtk_box_append (box, label);
+    /* ----- Smiley‑Image aus der Resource ----- */
+    GtkWidget *smiley = gtk_image_new_from_resource ("/free/toq/finden/smiley1");
+    gtk_image_set_pixel_size (GTK_IMAGE (smiley), 28);   // Smiley Größe
+
+    /* ----- BOX-Widget für Text und Smiley erstellen ----- */
+    GtkBox *smileytext_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+    gtk_widget_set_halign (GTK_WIDGET (smileytext_box), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (GTK_WIDGET (smileytext_box), GTK_ALIGN_CENTER);
+
+    /* ----- Smiley und TextLabel der Box hinzufügen ----- */ 
+    gtk_box_append (smileytext_box, label1);
+    gtk_box_append (smileytext_box, smiley); // Reihenfolge von Label und Smiley
+
+    gtk_box_append (GTK_BOX (mainbox), GTK_WIDGET (smileytext_box));
 
     /* ----- Suchleiste + Root‑Checkbutton oberhalb der Schaltfläche (horizontal) ----- */
-    static GtkWidget *search_entry = NULL;   /* Suchleiste */
-    static GtkWidget *search_box   = NULL;   /* Gtk-Box */
+    GtkWidget *search_entry = NULL;   // Suchleisten-Widget
+    GtkWidget *search_box   = NULL;   // Box-Widget in der sich die Suchleiste befindet
+    GtkWidget *checkb_box = NULL;     // Box-Widget für Checkboxen
 
     if (!search_entry) {
     /* Suchfeld */
@@ -373,52 +534,92 @@ static void on_activate (AdwApplication *app, gpointer)
                           search_entry);
     }
 
-     /* Kontrollkästchen/Checkbox mit Namen "root" */
-    if (!root_check) {
-        root_check = GTK_CHECK_BUTTON (gtk_check_button_new_with_label ("Root"));
-        gtk_check_button_set_active (root_check, FALSE);
-    }
-
-    /* Horizontales Box‑Widget nur einmal erzeugen */
+    /* --- Horizontales Box-Widget für Suchleiste hier erzeugen ---------------------------- */
     if (!search_box) {
         search_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
         gtk_widget_set_hexpand (search_box, TRUE);
-        /* Beide Widgets nur hier einfügen – danach besitzen sie einen Eltern‑Container */
+        /* Widgets nur hier einfügen – danach besitzen sie einen Eltern‑Container */
         gtk_box_append (GTK_BOX (search_box), search_entry);
-        gtk_box_append (GTK_BOX (search_box), GTK_WIDGET (root_check));
     }
 
     /* Das bereits vorbereitete horizontale Box‑Widget in die vertikale Haupt‑Box einfügen */
-    gtk_box_append (box, search_box);
+    gtk_box_append (mainbox, search_box);
 
-    /* Flatpak-App-Version hat kein Zugriff auf Root, Checkbox deaktivieren */
-    if (getenv("FLATPAK_ID")) {
-     gtk_widget_set_sensitive(GTK_WIDGET(root_check), FALSE);
+    /* --- Horizontales Box-Widget für Checkboxen hier erzeugen ------------------------- */
+    if (!checkb_box) { 
+        checkb_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6); 
+        gtk_widget_set_hexpand(checkb_box, TRUE);
+
+        /* Zentrierung der Widgetbox, wirkt sich auf die darin bef. Kontrollkästchen aus */
+        gtk_widget_set_hexpand (checkb_box, FALSE);            //  nicht autom. Ausdehnen
+        gtk_widget_set_halign (checkb_box, GTK_ALIGN_CENTER);  // zentrieren
+        gtk_widget_set_valign (checkb_box, GTK_ALIGN_CENTER);
+    }
+
+    /* --- (1.)Kontrallkästchen/Checkbox mit Namen "Ignoriere Snapshots" erstellen --- */
+    GtkWidget *snapshots_check = gtk_check_button_new_with_label(_("Snapshots durchsuchen"));
+    gtk_check_button_set_active(GTK_CHECK_BUTTON(snapshots_check), FALSE);
+
+     /* --- (2.)Kontrollkästchen/Checkbox mit Namen "root" erstellen --- */
+    GtkCheckButton *root_check = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(_("Root durchsuchen")));
+    gtk_check_button_set_active(root_check, FALSE);
+
+    /* --- Beide Checkboxen in horizontale Box einfügen (hier gilt die Reihenfolge) --- */
+    gtk_box_append(GTK_BOX(checkb_box), GTK_WIDGET(snapshots_check));  
+    gtk_box_append(GTK_BOX(checkb_box), GTK_WIDGET(root_check));
+
+    /* Die Widget-Box"checkb_box" der Eltern-WidgetBox"box" hinzugügen */
+    gtk_box_append(GTK_BOX(mainbox), checkb_box);
+
+        /* Flatpak-App-Version hat kein Zugriff auf Root, Checkboxen deaktivieren */
+        if (is_flatpak) 
+        {
+           gtk_widget_set_sensitive(GTK_WIDGET(root_check), FALSE);
+           gtk_widget_set_sensitive(GTK_WIDGET(snapshots_check), FALSE);
+        }
+
+    /* --- Schaltflächen-WidgetBox hier anlegen: ------------------------------ */
+    GtkWidget *button_hbox = NULL;
+    if (!button_hbox) {
+        button_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 12);
+        gtk_widget_set_hexpand(button_hbox, FALSE);                // nicht ausdehnen
+        gtk_widget_set_halign(button_hbox, GTK_ALIGN_CENTER);      // zentriert
     }
 
     /* --- Schaltfläche-Finden:  ------------------------------------------------- */
-    GtkWidget *new_button = gtk_button_new_with_label (_("  Finden  "));
-    gtk_widget_set_halign (new_button, GTK_ALIGN_CENTER);
-    g_signal_connect (new_button, "clicked",
-                      G_CALLBACK (on_search_button_clicked),
-                      search_entry);          /* user_data = entry */
-    gtk_box_append (box, new_button);
+    GtkWidget *search_button = gtk_button_new_with_label (_("  Finden  "));
+    g_signal_connect (search_button, "clicked",
+                      G_CALLBACK (on_search_button_clicked), search_entry); //user_data = entry
 
     /* ----- Schaltfläche Beenden erzeugen ----- */
-    GtkWidget *quit_btn = gtk_button_new_with_label(_("Beenden"));
-    gtk_widget_set_halign(quit_btn, GTK_ALIGN_CENTER);
+    GtkWidget *quit_button = gtk_button_new_with_label(_("Beenden"));
+    //gtk_widget_set_halign(quit_button, GTK_ALIGN_CENTER);
+    
+    /* ---- Schaltfläche Signal verbinden ---- */
+           // Methode um Anwendung mit jeglichen Instanzen zu schließen:
+//            g_signal_connect(quit_button, "clicked", G_CALLBACK(on_quitbtn_clicked), app);
+      // Nethode um das Fenster zu schließen, egal wieviele Instanzen existieren:
+         g_signal_connect(quit_button, "clicked", G_CALLBACK(on_quitbtn_clicked), adw_win);
 
-    /* ----- Callback auslösen ----- */
-    g_signal_connect(quit_btn, "clicked", G_CALLBACK(on_quitbtn_clicked), app);
+    /* ---- Kontrollkästchen Signal verbinden ---- */
+    // Das ist nur um den Fokus für die Suchleiste wieder neu zu setzen!
+    g_signal_connect(snapshots_check, "toggled", G_CALLBACK(on_check_button_toggled), search_entry);
+    g_signal_connect(root_check, "toggled", G_CALLBACK(on_check_button_toggled), search_entry);
 
     /* ----- Schaltfläche der Box hinzufügen ----- */
-    gtk_box_append(box, quit_btn);
+    gtk_box_append(GTK_BOX(button_hbox), quit_button);    
+    gtk_box_append(GTK_BOX(button_hbox), search_button);
+
+    /* --- Checkboxen am Search-Button speichern, damit im Callback diese auch abrufen werden --- */
+    g_object_set_data(G_OBJECT(search_button), "root_check", root_check);
+    g_object_set_data(G_OBJECT(search_button), "snapshots_check", snapshots_check);
 
     /* -----  Box zur ToolbarView hinzufügen ------------ */
-    adw_toolbar_view_set_content(toolbar_view, GTK_WIDGET(box));
+    gtk_box_append(GTK_BOX(mainbox), button_hbox);
+    adw_toolbar_view_set_content(toolbar_view, GTK_WIDGET(mainbox));
 
     /* ----- Fenster desktop‑konform anzeigen ----- */
-    gtk_window_present(GTK_WINDOW(win));
+    gtk_window_present(GTK_WINDOW(adw_win));
     gtk_widget_grab_focus(search_entry); //fokus auf Suchleiste
 
 }
@@ -428,30 +629,37 @@ static void on_activate (AdwApplication *app, gpointer)
  * --------------------------------------------------------------------------- */
 int main (int argc, char **argv)
 {
-    char *app_dir = g_get_current_dir();  // Ermit. den aktuellen Arbeitsverzeichnis-Pfad
+
     const char *locale_path = NULL;
-    const char *flatpak_id = getenv("FLATPAK_ID"); //flatpak string free.toq.finden anderenfalls NULL !
 
     /* Resource‑Bundle (finden.gresource) registrieren um den Inhalt verfügbar zu machen */
-    //g_resources_register (resources_get_resource ());
+    g_resources_register (resources_get_resource ()); // reicht für Icon innerhalb der App
 
     /* ----- Erstelle den Pfad zu den locale-Dateien ----------------------------------- */
-    setlocale(LC_ALL, "");
-    textdomain("toq-finden");
-    bind_textdomain_codeset("toq-finden", "UTF-8"); // Basisverzeichnis für Übersetzungen
-    if (flatpak_id != NULL && flatpak_id[0] != '\0')  // Wenn ungleich NULL:
+    init_environment(); // Globale Umgebungsvariablen
+    find_miniterm ();   // miniterm Pfad suchen
+    if (is_flatpak)     // App ist FlatpakApp ? (global)
     {
         locale_path = "/app/share/locale"; // Flatpakumgebung /app/share/locale
     } else {
         locale_path = "/usr/share/locale"; // Native Hostumgebung /usr/share/locale
     }
+    setlocale(LC_ALL, "");
+    textdomain("toq-finden");
+    bind_textdomain_codeset("toq-finden", "UTF-8"); // Basisverzeichnis für Übersetzungen
     bindtextdomain("toq-finden", locale_path);
     g_print (_("Lokalisierung in: %s \n"), locale_path); // testen
 
+    /* GTK/Adwaita Anwendung: */
     g_autoptr (AdwApplication) app =                        // Instanz erstellen + App-ID + Default-Flags;
-        adw_application_new ("free.toq.finden_0.6.5", G_APPLICATION_DEFAULT_FLAGS);
+        adw_application_new ("free.toq.finden", G_APPLICATION_DEFAULT_FLAGS);
 
-    g_signal_connect (app, "activate", G_CALLBACK (on_activate), NULL); // Signal mit on_activate verbinden
-    /* --- g_application_run startet Anwendung u. wartet auf Ereignis --- */
-    return g_application_run (G_APPLICATION (app), argc, argv);
+    g_signal_connect (app, "activate", G_CALLBACK (on_activate), NULL); // Signal zu on_activate
+
+    /* Event_Loop */
+    int ret = g_application_run (G_APPLICATION (app), argc, argv);
+
+    g_free (app_dir);          // aus global init_environment()
+    g_free (glob_term_path);   // aus global find_miniterm()
+    return ret;
 }

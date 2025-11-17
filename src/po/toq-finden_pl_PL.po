@@ -6,10 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: 1\n"
+"Project-Id-Version: 2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-09 18:57+0100\n"
-"PO-Revision-Date: 2025-11-10 HO:MI+ZONE\n"
+"POT-Creation-Date: 2025-11-17 11:20+0100\n"
 "Last-Translator: super-toq <toq@mailbox.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: german/polish\n"
@@ -17,106 +16,141 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: main.c:45
-msgid "Kein gültiges Elternfenster für Alert-Dialog"
-msgstr "Brak prawidłowego okna rodziców dla okna dialogowego alertu"
+#: main.c:49
+msgid "Der exe_path kann nicht erstellt werden.\n"
+msgstr "Nie można utworzyć exe_path.\n"
 
-#: main.c:53
+#: main.c:63
+msgid "[G] Abbruch, Variable 'app_dir' wurde nicht gesetzt!\n"
+msgstr "Przerwanie, zmienna 'app_dir' nie została ustawiona!\n"
+
+#: main.c:75
+#, c-format
+msgid " %s gefunden in %s\n"
+msgstr " %s znaleziono w %s\n"
+
+#: main.c:102
+msgid "Kein gültiges Elternfenster für Alert-Dialog.\n"
+msgstr "Brak prawidłowego okna rodziców dla okna dialogowego alertu.\n"
+
+#: main.c:110
 msgid "Abbrechen"
 msgstr "Anuluj"
 
-#: main.c:127
-msgid "Bitte einen Suchbegriff eingeben."
-msgstr "Wpisz szukane hasło."
+#: main.c:215
+msgid "Bitte einen Suchbegriff eingeben.\n"
+msgstr "Wpisz szukane hasło.\n"
 
-#: main.c:140
+#: main.c:240
 #, c-format
-msgid "Abbruch, Tool %s wurde nicht gefunden!"
-msgstr "Przerwanie, nie znaleziono narzędzia %s!"
+msgid "Abbruch, Tool %s wurde nicht gefunden!\n"
+msgstr "Przerwanie, narzędzie %s nie zostało znalezione!\n"
 
-#: main.c:148
+#: main.c:259
 #, c-format
 msgid "Root-Schalter %s\n"
 msgstr "Przełącznik root %s\n"
 
-#: main.c:148
+#: main.c:260 main.c:263
 msgid "aktiviert"
 msgstr "aktywowany"
 
-#: main.c:148
+#: main.c:260 main.c:263
 msgid "nicht aktiviert"
 msgstr "nieaktywny"
 
-#: main.c:154
-msgid ""
-"Service run0 ist nicht aktiv. Bitte überprüfen Sie Ihre "
-"Systemkonfiguration.\n"
-msgstr "Usługa run0 nie jest aktywna. Sprawdź konfigurację systemu.\n"
+#: main.c:262
+#, c-format
+msgid "Snapshots-Schalter %s\n"
+msgstr "Przełącznik zrzutów %s\n"
 
-#: main.c:163
+#: main.c:302
+msgid "Anwendung ist flatpak Version, Optionen sind deaktiviert.\n"
+msgstr "Aplikacja jest wersją Flatpak, opcje są wyłączone.\n"
+
+#: main.c:317
+msgid "Service run0 ist nicht aktiv.\n"
+msgstr "Usługa Run0 nie jest aktywna.\n"
+
+#: main.c:327
 msgid "Run0 nicht aktiviert"
 msgstr "Run0 nieaktywny"
 
-#: main.c:164
+#: main.c:328
 msgid ""
 "Der Service Run0 ist nicht aktiv,\n"
-"Bitte überprüfen Sie Ihre Systemkonfiguration.\n"
+"bitte überprüfen Sie Ihre Systemkonfiguration.\n"
 msgstr ""
 "Usługa Run0 nie jest aktywna,\n"
 "sprawdź konfigurację systemu.\n"
+#: main.c:339
+msgid "Service run0 vorhanden.\n"
+msgstr "Usługa run0 jest dostępna.\n"
 
-#: main.c:170
-msgid "Service run0 vorhanden\n"
-msgstr "Service run0 available\n"
-
-#: main.c:195
-msgid "Der exe_path kann nicht erstellt werden"
-msgstr "Nie można utworzyć ścieżki exe_path."
-
-#: main.c:212 main.c:228
+#: main.c:345
+msgid ""
+"Service run0 vorhanden.\n"
+"Pfad für .snapshots aktiv.\n"
+msgstr ""
+"Usługa run0 jest dostępna.\n"
+"Ścieżka dla .snapshots jest aktywna.\n"
+#: main.c:371
 #, c-format
-msgid "%s gefunden in %s\n"
-msgstr "%s znaleziono w %s\n"
+msgid "[L1] %s gefunden in %s\n"
+msgstr "[L1] %s znaleziono w %s\n"
 
-#: main.c:236
-msgid "Kein unterstütztes Terminal gefunden!"
-msgstr "Nie znaleziono obsługiwanego terminala!"
+#: main.c:388
+#, c-format
+msgid "[L2] %s gefunden in %s\n"
+msgstr "[L2] %s znaleziono w %s\n"
 
-#: main.c:240
+#: main.c:396
+msgid "Kein unterstütztes Terminal gefunden!\n"
+msgstr "Nie znaleziono obsługiwanego terminala!\n"
+
+#: main.c:400
 msgid "Kein Terminal gefunden"
 msgstr "Nie znaleziono terminala"
 
-#: main.c:241
+#: main.c:401
 msgid ""
 "Es konnte kein unterstütztes Terminal auf diesem System gefunden werden."
 msgstr "Nie znaleziono żadnego obsługiwanego terminala w tym systemie."
 
-#: main.c:266
+#: main.c:426
 #, c-format
 msgid "Fehler beim Starten des Terminals: %s"
 msgstr "Błąd podczas uruchamiania terminala: %s"
 
-#: main.c:316
+#: main.c:480
 msgid "Über Finden"
 msgstr "O Finden"
 
-#: main.c:338
-msgid "Finden statt Suchen 😉"
-msgstr "Znajdowanie zamiast Szukania 😉"
+#: main.c:502
+msgid "Finden statt Suchen"
+msgstr "Znajdowanie zamiast Szukania"
 
-#: main.c:353
+#: main.c:530
 msgid "Suchbegriff eingeben …"
 msgstr "Wpisz frazę …"
 
-#: main.c:382
+#: main.c:563
+msgid "Snapshots durchsuchen"
+msgstr "Przeszukaj zrzuty"
+
+#: main.c:567
+msgid "Root durchsuchen"
+msgstr "Przeszukaj root"
+
+#: main.c:593
 msgid "  Finden  "
 msgstr "Znajdować"
 
-#: main.c:390
+#: main.c:598
 msgid "Beenden"
 msgstr "Zakończ"
 
-#: main.c:422
+#: main.c:649
 #, c-format
 msgid "Lokalisierung in: %s \n"
 msgstr "Lokalizacja w: %s \n"
