@@ -39,7 +39,7 @@ static void init_environment(void)
 {
 flatpak_id = getenv("FLATPAK_ID"); //siehe G.Ref.
 is_flatpak = (flatpak_id != NULL && flatpak_id[0] != '\0');
-is_flatpak = 1; // zum Testen des Verhaltens einer Flatpak App
+//is_flatpak = 1; // zum Testen des Verhaltens einer Flatpak App
 
     /* Pfad zum eigenen Executable Verzeichnis */
     gchar *exe_path = g_file_read_link("/proc/self/exe", NULL);
