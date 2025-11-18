@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: 2\n"
+"Project-Id-Version: 2.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-17 11:22+0100\n"
+"POT-Creation-Date: 2025-11-18 10:44+0100\n"
 "PO-Revision-Date: 2025-11-17 HO:MI+ZONE\n"
 "Last-Translator: super-toq <toq@mailbox.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,141 +17,157 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: main.c:49
+#: main.c:47
 msgid "Der exe_path kann nicht erstellt werden.\n"
 msgstr "The exe_path cannot be created.\n"
 
-#: main.c:63
+#: main.c:53
+#, c-format
+msgid "Anwendungspfad: %s \n"
+msgstr "Application path: %s \n"
+
+#: main.c:61
 msgid "[G] Abbruch, Variable 'app_dir' wurde nicht gesetzt!\n"
 msgstr "Abort, variable 'app_dir' was not set!\n"
 
-#: main.c:75
+#: main.c:65
+#, c-format
+msgid "miniterm in Umgebung gefunden: %s \n"
+msgstr "miniterm found in environment: %s \n"
+
+#: main.c:73
 #, c-format
 msgid " %s gefunden in %s\n"
 msgstr " %s found in %s\n"
 
-#: main.c:102
+#: main.c:98
 msgid "Kein gültiges Elternfenster für Alert-Dialog.\n"
 msgstr "No valid parent window for alert dialog\n"
 
-#: main.c:110
+#: main.c:106
 msgid "Abbrechen"
 msgstr "Cancel"
 
-#: main.c:215
+#: main.c:221
 msgid "Bitte einen Suchbegriff eingeben.\n"
 msgstr "Please enter a search term.\n"
 
-#: main.c:240
+#: main.c:236
 #, c-format
 msgid "Abbruch, Tool %s wurde nicht gefunden!\n"
 msgstr "Abort, tool %s was not found!\n"
 
-#: main.c:259
+#: main.c:252
 #, c-format
 msgid "Root-Schalter %s\n"
 msgstr "Root switch  %s\n"
 
-#: main.c:260 main.c:263
+#: main.c:253 main.c:256
 msgid "aktiviert"
 msgstr "activated"
 
-#: main.c:260 main.c:263
+#: main.c:253 main.c:256
 msgid "nicht aktiviert"
 msgstr "not activated"
 
-#: main.c:262
+#: main.c:255
 #, c-format
 msgid "Snapshots-Schalter %s\n"
 msgstr "Snapshots switch %s\n"
 
-#: main.c:302
+#: main.c:299
+msgid "Suchfunktion wird nur im Homeverzeichnis durchgeführt.\n"
+msgstr "Search function is only performed in home directory.\n"
+
+#: main.c:306
 msgid "Anwendung ist flatpak Version, Optionen sind deaktiviert.\n"
 msgstr "Application is a Flatpak version, options are disabled.\n"
 
-#: main.c:317
+#: main.c:320
 msgid "Service run0 ist nicht aktiv.\n"
 msgstr "The service run0 is not active.\n"
 
-#: main.c:327
+#: main.c:330
 msgid "Run0 nicht aktiviert"
 msgstr "Run0 is not activated."
 
-#: main.c:328
+#: main.c:331
 msgid ""
 "Der Service Run0 ist nicht aktiv,\n"
 "bitte überprüfen Sie Ihre Systemkonfiguration.\n"
 msgstr ""
 "The service run0 is not active.\n"
 "Please check your system configuration.\n"
-#: main.c:339
+
+#: main.c:342
 msgid "Service run0 vorhanden.\n"
 msgstr "Service run0 available.\n"
 
-#: main.c:345
+#: main.c:348
 msgid ""
 "Service run0 vorhanden.\n"
 "Pfad für .snapshots aktiv.\n"
 msgstr ""
 "Service run0 available.\n"
 "Searching the .snapshots path.\n"
-#: main.c:371
+
+#: main.c:376
 #, c-format
 msgid "[L1] %s gefunden in %s\n"
 msgstr "[L1] %s found in %s\n"
 
-#: main.c:388
+#: main.c:393
 #, c-format
 msgid "[L2] %s gefunden in %s\n"
 msgstr "[L2] %s found in %s\n"
 
-#: main.c:396
+#: main.c:401
 msgid "Kein unterstütztes Terminal gefunden!\n"
 msgstr "No supported terminal found!\n"
 
-#: main.c:400
+#: main.c:405
 msgid "Kein Terminal gefunden"
 msgstr "No terminal found"
 
-#: main.c:401
+#: main.c:406
 msgid ""
 "Es konnte kein unterstütztes Terminal auf diesem System gefunden werden."
 msgstr "No supported terminal could be found on this system."
 
-#: main.c:426
+#: main.c:431
 #, c-format
 msgid "Fehler beim Starten des Terminals: %s"
 msgstr "Error starting terminal: %s"
 
-#: main.c:480
+#: main.c:485
 msgid "Über Finden"
 msgstr "About Finden"
 
-#: main.c:502
+#: main.c:507
 msgid "Finden statt Suchen"
 msgstr "Finding instead of Searching"
 
-#: main.c:530
+#: main.c:535
 msgid "Suchbegriff eingeben …"
 msgstr "Enter search term …"
 
-#: main.c:563
+#: main.c:566
 msgid "Snapshots durchsuchen"
-msgstr "Search in snapshots."
+msgstr "Search in snapshots"
 
-#: main.c:567
+#: main.c:570
 msgid "Root durchsuchen"
-msgstr "Search in Root"
+msgstr "Search in rootfolder"
 
-#: main.c:593
+#: main.c:596
 msgid "  Finden  "
 msgstr "Find now"
 
-#: main.c:598
+#: main.c:613
 msgid "Beenden"
 msgstr " Exit "
 
-#: main.c:649
+#: main.c:669
 #, c-format
 msgid "Lokalisierung in: %s \n"
 msgstr "Localization in: %s \n"

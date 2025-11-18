@@ -8,7 +8,7 @@
  * Please note:
  * The Use of this code and execution of the applications is at your own risk, I accept no liability!
  *
- * Version 0.8
+ * Version 0.8.1
  */
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -50,7 +50,7 @@ is_flatpak = (flatpak_id != NULL && flatpak_id[0] != '\0');
     }
     /* Eigenen Pfad ermitteln: */
     app_dir = g_path_get_dirname(exe_path); // =Global
-    g_print ("Anwendungspfad: %s \n", app_dir);
+    g_print (_("Anwendungspfad: %s \n"), app_dir);
     g_free(exe_path);
 }
 
@@ -62,7 +62,7 @@ if (!app_dir) {g_warning (_("[G] Abbruch, Variable 'app_dir' wurde nicht gesetzt
 
  /* 1. Pfad zu miniterm im selben Verzeichnis suchen */
     gchar *miniterm_path = g_build_filename(app_dir, "free.toq.miniterm", NULL);
-    g_print ("miniterm in Umgebung gefunden: %s \n", miniterm_path); // testen
+    g_print (_("miniterm in Umgebung gefunden: %s \n"), miniterm_path); // testen
     g_free(app_dir);
 
 
@@ -123,7 +123,7 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     AdwAboutDialog *about = ADW_ABOUT_DIALOG (adw_about_dialog_new ());
     //adw_about_dialog_set_body(about, "Hierbei handelt es sich um ein klitzekleines Testprojekt."); //nicht in meiner adw Version?
     adw_about_dialog_set_application_name (about, "Finden");
-    adw_about_dialog_set_version (about, "0.8");
+    adw_about_dialog_set_version (about, "0.8.1");
     adw_about_dialog_set_developer_name (about, "toq (super-toq)");
     adw_about_dialog_set_website (about, "https://github.com/super-toq");
 
@@ -296,7 +296,7 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
     switch (mode)
     {
         case ROOT_OFF:  // ROOT=0
-            g_print("Suchefunktion wird nur im Homeverzeichnis durchgeführt.\n"); // testen
+            g_print(_("Suchfunktion wird nur im Homeverzeichnis durchgeführt.\n")); // testen
             /* find Kommando [A] verwenden  */
             cmd_action = action_A; // action_A wird in "static void action_A" definiert
             break;
@@ -654,8 +654,6 @@ int main (int argc, char **argv)
     g_resources_register (resources_get_resource ()); // reicht für Icon innerhalb der App
 
     /* ----- Erstelle den Pfad zu den locale-Dateien ----------------------------------- */
-    init_environment(); // Globale Umgebungsvariablen
-    find_miniterm ();   // miniterm Pfad suchen
     if (is_flatpak)     // App ist FlatpakApp ? (global)
     {
         locale_path = "/app/share/locale"; // Flatpakumgebung /app/share/locale
@@ -667,6 +665,10 @@ int main (int argc, char **argv)
     bind_textdomain_codeset("toq-finden", "UTF-8"); // Basisverzeichnis für Übersetzungen
     bindtextdomain("toq-finden", locale_path);
     g_print (_("Lokalisierung in: %s \n"), locale_path); // testen
+
+
+    init_environment(); // Globale Umgebungsvariablen
+    find_miniterm ();   // miniterm Pfad suchen
 
     /* GTK/Adwaita Anwendung: */
     g_autoptr (AdwApplication) app =                        // Instanz erstellen + App-ID + Default-Flags;
