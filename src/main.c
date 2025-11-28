@@ -8,12 +8,12 @@
  * Please note:
  * The Use of this code and execution of the applications is at your own risk, I accept no liability!
  *
- * Version 0.8.2
+ * Version 0.8.5
  */
 #include <glib.h>
 #include <gtk/gtk.h>
 #include <adwaita.h>
-#include "icon-gresource.h" // binäre Icons
+#include "icon-gresource.h"
 #include <locale.h> 
 #include <glib/gi18n.h>
 
@@ -123,7 +123,7 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     AdwAboutDialog *about = ADW_ABOUT_DIALOG (adw_about_dialog_new ());
     //adw_about_dialog_set_body(about, "Hierbei handelt es sich um ein klitzekleines Testprojekt."); //nicht in meiner adw Version?
     adw_about_dialog_set_application_name (about, "Finden");
-    adw_about_dialog_set_version (about, "0.8.2");
+    adw_about_dialog_set_version (about, "0.8.6");
     adw_about_dialog_set_developer_name (about, "toq (super-toq)");
     adw_about_dialog_set_website (about, "https://github.com/super-toq");
 
@@ -199,13 +199,37 @@ static void on_quitbtn_clicked(GtkButton *button, gpointer user_data)
     { 
     GtkWindow *win = GTK_WINDOW(user_data);
     gtk_window_destroy(win);
+
+    UiRefs *refs = g_object_get_data (G_OBJECT (button), "ui_refs");
+    if (refs) g_free (refs);
     }
 
-/* ----- Callback für Kontrollkästchen damit Suchleiste wieder Fokus erhält ----- */
-void on_check_button_toggled(GtkToggleButton *toggle_button, gpointer user_data) {
-    
-    GtkWidget *search_entry = GTK_WIDGET(user_data);
-    gtk_widget_grab_focus(search_entry); // Setze den Fokus auf das Suchfeld
+/* ----- Callback für beide Kontrollkästchen (Toggle) ----------------------------------- */
+static void on_check_button_toggled (GtkCheckButton *toggle_check, gpointer user_data) 
+{
+    UiRefs *refs = user_data;               /* jetzt wirklich ein UiRefs‑Zeiger */
+
+    /* Fokus zurück auf das Suchfeld */
+    gtk_widget_grab_focus (GTK_WIDGET (refs->search_entry));
+
+    /* Checkboxen-Status herausfinden */
+    if (toggle_check == refs->root_check) 
+    {
+        /* Wenn Root deaktiviert muss Snapshots ebenfalls deaktiviert werden */
+        if (!gtk_check_button_get_active (refs->root_check))
+            gtk_check_button_set_active (refs->snapshots_check, FALSE);
+        return;
+    }
+
+
+    if (toggle_check == refs->snapshots_check)
+    {
+        /* Optional: wenn Snapshots aktiviert wird, Root aktivieren */
+        if (gtk_check_button_get_active (refs->snapshots_check))
+            gtk_check_button_set_active (refs->root_check, TRUE);
+        return;
+    }
+
 }
 
 /* ----- Callback Suchfunktion ausführen | Hauptfunktion --------------------------------- */
@@ -458,7 +482,7 @@ static void on_activate (AdwApplication *app, gpointer)
     /* ----- Adwaita-Fenster ------------------------ */
     AdwApplicationWindow *adw_win = ADW_APPLICATION_WINDOW (adw_application_window_new (GTK_APPLICATION (app))); 
 
-    gtk_window_set_title (GTK_WINDOW(adw_win), "Finden");         // Fenstertitel
+    gtk_window_set_title (GTK_WINDOW(adw_win), "Finden");         // WM-Titel
     gtk_window_set_default_size (GTK_WINDOW(adw_win), 480, 280);  // Standard-Fenstergröße
     gtk_window_set_resizable (GTK_WINDOW (adw_win), FALSE);       // Skalierung nicht erlauben
     gtk_window_present (GTK_WINDOW(adw_win));                     // Fenster anzeigen lassen
@@ -469,11 +493,9 @@ static void on_activate (AdwApplication *app, gpointer)
 
     /* ----- HeaderBar mit TitelWidget erstellt und dem ToolbarView hinzugefügt ------------ */
     AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new());
-    /* Label mit Pango‑Markup erzeugen */
-    GtkLabel *title_label = GTK_LABEL(gtk_label_new (NULL));
-    gtk_label_set_markup (title_label, "<b>Finden</b>");                // Fenstertitel in Markup
-    gtk_label_set_use_markup (title_label, TRUE);                       // Markup‑Parsing aktivieren
-    adw_header_bar_set_title_widget (header, GTK_WIDGET (title_label)); // Label als Title‑Widget einsetzen
+    GtkWidget * title_label = gtk_label_new ("Finden");                 // Label für Fenstertitel
+    gtk_widget_add_css_class (title_label, "heading");                  // .heading class
+    adw_header_bar_set_title_widget (ADW_HEADER_BAR (header), GTK_WIDGET (title_label)); // Label einsetzen
     adw_toolbar_view_add_top_bar (toolbar_view, GTK_WIDGET (header));   // Header‑Bar zur Toolbar‑View hinzuf
 
     /* --- Hamburger‑Button innerhalb der Headerbar --- */
@@ -485,7 +507,7 @@ static void on_activate (AdwApplication *app, gpointer)
     GMenu *menu = g_menu_new ();
     g_menu_append (menu, _("Über Finden"), "app.show-about");
     GtkPopoverMenu *popover = GTK_POPOVER_MENU (
-        gtk_popover_menu_new_from_model (G_MENU_MODEL (menu)));
+    gtk_popover_menu_new_from_model (G_MENU_MODEL (menu)));
     gtk_menu_button_set_popover (menu_btn, GTK_WIDGET (popover));
 
     /* --- Action die den About‑Dialog öffnet --- */
@@ -511,7 +533,7 @@ static void on_activate (AdwApplication *app, gpointer)
 
     /* ----- Smiley‑Image aus der Resource ----- */
     GtkWidget *smiley = gtk_image_new_from_resource ("/free/toq/finden/smiley1");
-    gtk_image_set_pixel_size (GTK_IMAGE (smiley), 28);   // Smiley Größe
+    gtk_image_set_pixel_size (GTK_IMAGE (smiley), 32);   // Smiley Größe
 
     /* ----- BOX-Widget für Text und Smiley erstellen ----- */
     GtkBox *smileytext_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
@@ -531,19 +553,18 @@ static void on_activate (AdwApplication *app, gpointer)
 
     if (!search_entry) {
     /* Suchfeld */
-        search_entry = gtk_entry_new ();
-        gtk_entry_set_placeholder_text (GTK_ENTRY (search_entry),
-                                        _("Suchbegriff eingeben …"));
+        search_entry = gtk_search_entry_new ();
+        gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_entry),
+                                       _("Suchbegriff eingeben …"));
         gtk_widget_set_hexpand (search_entry, TRUE);
         gtk_widget_set_halign (search_entry, GTK_ALIGN_FILL);
         gtk_widget_set_size_request (search_entry, 300, -1);
-
 
     }
 
     /* --- Horizontales Box-Widget für Suchleiste hier erzeugen ---------------------------- */
     if (!search_box) {
-        search_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+        search_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 16);
         gtk_widget_set_hexpand (search_box, TRUE);
         /* Widgets nur hier einfügen – danach besitzen sie einen Eltern‑Container */
         gtk_box_append (GTK_BOX (search_box), search_entry);
@@ -565,11 +586,13 @@ static void on_activate (AdwApplication *app, gpointer)
 
     /* --- (1.)Kontrallkästchen/Checkbox mit Namen "Ignoriere Snapshots" erstellen --- */
     GtkWidget *snapshots_check = gtk_check_button_new_with_label(_("Snapshots durchsuchen"));
-    gtk_check_button_set_active(GTK_CHECK_BUTTON(snapshots_check), FALSE);
+    gtk_widget_add_css_class (snapshots_check, "selection-mode");
+    gtk_check_button_set_active (GTK_CHECK_BUTTON(snapshots_check), FALSE);
 
      /* --- (2.)Kontrollkästchen/Checkbox mit Namen "root" erstellen --- */
-    GtkCheckButton *root_check = GTK_CHECK_BUTTON(gtk_check_button_new_with_label(_("Root durchsuchen")));
-    gtk_check_button_set_active(root_check, FALSE);
+    GtkWidget *root_check = gtk_check_button_new_with_label(_("Root durchsuchen"));
+    gtk_widget_add_css_class (root_check, "selection-mode");
+    gtk_check_button_set_active (GTK_CHECK_BUTTON(root_check), FALSE);
 
     /* --- Beide Checkboxen in horizontale Box einfügen (hier gilt die Reihenfolge) --- */
     gtk_box_append(GTK_BOX(checkb_box), GTK_WIDGET(snapshots_check));  
@@ -585,6 +608,14 @@ static void on_activate (AdwApplication *app, gpointer)
            gtk_widget_set_sensitive(GTK_WIDGET(snapshots_check), FALSE);
         }
 
+    /* --- Kontext-Struct-Block für die Initialisierung einer UI-Referenzstruktur --- */
+    /* "refs" zeigt auf neu erstellten “Behälter” für UI-Elemente */
+    UiRefs *refs = g_new0(UiRefs, 1); // Speicherort anlegen, erzeuge 1 UiRefs im Heap.
+    refs->search_entry    = GTK_EDITABLE(search_entry); // Pointer zum Eingabefeld im Struct.
+    refs->root_check      = GTK_CHECK_BUTTON(root_check); // Pointer zur Root-Checkbox.
+    refs->snapshots_check = GTK_CHECK_BUTTON(snapshots_check); // Pointer zur Snapshots-Checkbox.
+
+
     /* --- Schaltflächen-WidgetBox hier anlegen: ------------------------------ */
     GtkWidget *button_hbox = NULL;
     if (!button_hbox) {
@@ -596,12 +627,9 @@ static void on_activate (AdwApplication *app, gpointer)
     /* --- Schaltfläche-Finden:  ------------------------------------------------- */
     GtkWidget *search_button = gtk_button_new_with_label (_("  Finden  "));
 
-    /* --- Kontext-Struct-Block für die Initialisierung einer UI-Referenzstruktur --- */
-    /* "refs" zeigt auf neu erstellten “Behälter” für UI-Elemente */
-    UiRefs *refs = g_new0(UiRefs, 1); // Speicher für Struct anlegen, erzeuge 1 UiRefs im Heap.
-    refs->search_entry    = GTK_EDITABLE(search_entry); // Pointer zum Eingabefeld im Struct.
-    refs->root_check      = GTK_CHECK_BUTTON(root_check); // Pointer zur Root-Checkbox.
-    refs->snapshots_check = GTK_CHECK_BUTTON(snapshots_check); // Pointer zur Snapshots-Checkbox.
+     /* ----- Schaltfläche in Theme-Akzent-Farbe und Pill Class ------------------ */
+    gtk_widget_add_css_class (search_button, "suggested-action");
+    gtk_widget_add_css_class (search_button, "pill");
 
     /* --- Schaltfläche verbinden --- */
     g_signal_connect(search_button, "clicked",
@@ -612,6 +640,7 @@ static void on_activate (AdwApplication *app, gpointer)
 
     /* ----- Schaltfläche Beenden erzeugen ----- */
     GtkWidget *quit_button = gtk_button_new_with_label(_("Beenden"));
+    gtk_widget_add_css_class (quit_button, "pill");
     //gtk_widget_set_halign(quit_button, GTK_ALIGN_CENTER);
     
     /* ---- Schaltfläche Signal verbinden ---- */
@@ -621,9 +650,9 @@ static void on_activate (AdwApplication *app, gpointer)
          g_signal_connect(quit_button, "clicked", G_CALLBACK(on_quitbtn_clicked), adw_win);
 
     /* ---- Kontrollkästchen Signal verbinden ---- */
-    // Das ist nur um den Fokus für die Suchleiste wieder neu zu setzen!
-    g_signal_connect(snapshots_check, "toggled", G_CALLBACK(on_check_button_toggled), search_entry);
-    g_signal_connect(root_check, "toggled", G_CALLBACK(on_check_button_toggled), search_entry);
+    // Toggel für beide Checkboxen, sowie um den Fokus für die Suchleiste wieder neu zu setzen!
+    g_signal_connect(snapshots_check, "toggled", G_CALLBACK(on_check_button_toggled), refs);
+    g_signal_connect(root_check, "toggled", G_CALLBACK(on_check_button_toggled), refs);
 
     /* ----- Schaltfläche der Box hinzufügen ----- */
     gtk_box_append(GTK_BOX(button_hbox), quit_button);    
