@@ -124,7 +124,7 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     //adw_about_dialog_set_body(about, "Hierbei handelt es sich um ein klitzekleines Testprojekt."); //nicht in meiner adw Version?
     adw_about_dialog_set_application_name (about, "Finden");
     adw_about_dialog_set_version (about, "0.8.6");
-    adw_about_dialog_set_developer_name (about, "toq (super-toq)");
+    adw_about_dialog_set_developer_name (about, "toq");
     adw_about_dialog_set_website (about, "https://github.com/super-toq");
 
     /* Lizenz – MIT wird als „custom“ angegeben */
@@ -527,9 +527,11 @@ static void on_activate (AdwApplication *app, gpointer)
     gtk_widget_set_vexpand (GTK_WIDGET (mainbox), TRUE);
 
     /* ----- Text-Label erstellen  ----- */
-    GtkWidget *label1 = gtk_label_new(_("Finden statt Suchen"));
-    gtk_widget_set_halign (label1, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign (label1, GTK_ALIGN_CENTER);
+    GtkLabel *label1 = GTK_LABEL(gtk_label_new (NULL));
+    gtk_label_set_markup (label1, _("<b>Finden statt Suchen</b>")); // Titel in Markup
+    gtk_label_set_use_markup (label1, TRUE);                        // Markup-Parsing aktivieren
+    gtk_widget_set_halign (GTK_WIDGET (label1), GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (GTK_WIDGET (label1), GTK_ALIGN_CENTER);
 
     /* ----- Smiley‑Image aus der Resource ----- */
     GtkWidget *smiley = gtk_image_new_from_resource ("/free/toq/finden/smiley1");
@@ -541,7 +543,7 @@ static void on_activate (AdwApplication *app, gpointer)
     gtk_widget_set_valign (GTK_WIDGET (smileytext_box), GTK_ALIGN_CENTER);
 
     /* ----- Smiley und TextLabel der Box hinzufügen ----- */ 
-    gtk_box_append (smileytext_box, label1);
+    gtk_box_append (smileytext_box, GTK_WIDGET (label1)); // Label in Widget convertieren
     gtk_box_append (smileytext_box, smiley); // Reihenfolge von Label und Smiley
 
     gtk_box_append (GTK_BOX (mainbox), GTK_WIDGET (smileytext_box));
@@ -629,7 +631,7 @@ static void on_activate (AdwApplication *app, gpointer)
 
      /* ----- Schaltfläche in Theme-Akzent-Farbe und Pill Class ------------------ */
     gtk_widget_add_css_class (search_button, "suggested-action");
-    gtk_widget_add_css_class (search_button, "pill");
+    //gtk_widget_add_css_class (search_button, "pill");
 
     /* --- Schaltfläche verbinden --- */
     g_signal_connect(search_button, "clicked",
@@ -640,7 +642,7 @@ static void on_activate (AdwApplication *app, gpointer)
 
     /* ----- Schaltfläche Beenden erzeugen ----- */
     GtkWidget *quit_button = gtk_button_new_with_label(_("Beenden"));
-    gtk_widget_add_css_class (quit_button, "pill");
+    //gtk_widget_add_css_class (quit_button, "pill");
     //gtk_widget_set_halign(quit_button, GTK_ALIGN_CENTER);
     
     /* ---- Schaltfläche Signal verbinden ---- */
