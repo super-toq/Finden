@@ -8,7 +8,7 @@
  * Please note:
  * The Use of this code and execution of the applications is at your own risk, I accept no liability!
  *
- * Version 0.8.5
+ * Version 0.8.7
  */
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -123,7 +123,7 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     AdwAboutDialog *about = ADW_ABOUT_DIALOG (adw_about_dialog_new ());
     //adw_about_dialog_set_body(about, "Hierbei handelt es sich um ein klitzekleines Testprojekt."); //nicht in meiner adw Version?
     adw_about_dialog_set_application_name (about, "Finden");
-    adw_about_dialog_set_version (about, "0.8.6");
+    adw_about_dialog_set_version (about, "0.8.7_2");
     adw_about_dialog_set_developer_name (about, "toq");
     adw_about_dialog_set_website (about, "https://github.com/super-toq");
 
@@ -166,7 +166,49 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     adw_dialog_present(ADW_DIALOG(about), GTK_WIDGET(parent));
 }//Ende About-Dialog
 
-/* ---- "find"-Kommando zusammenbauen - 
+/* ----- Einstellungen-Page ------------------------------------------------------------- */
+static void show_settings (GSimpleAction *action, GVariant *parameter, gpointer user_data)
+{
+    AdwNavigationView *nav = ADW_NAVIGATION_VIEW(user_data);
+
+    /* --- Inhalt der Settings-Seite --- */
+    GtkWidget *content = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
+    gtk_widget_set_margin_top(content, 24);
+    gtk_widget_set_margin_start(content, 24);
+
+    GtkWidget *label = gtk_label_new("Einstellungen ...");
+    gtk_widget_add_css_class(label, "title-4");
+    gtk_box_append(GTK_BOX(content), label);
+
+
+    /* --- ToolbarView für Settings-Seite --- */
+    AdwToolbarView *settings_toolbar = ADW_TOOLBAR_VIEW(adw_toolbar_view_new());
+
+    /* Headerbar erzeugen */
+    AdwHeaderBar *settings_header = ADW_HEADER_BAR(adw_header_bar_new());
+    GtkWidget *settings_label = gtk_label_new("Einstellungen");
+    gtk_widget_add_css_class(settings_label, "heading");
+    adw_header_bar_set_title_widget(settings_header, settings_label);
+
+    /* Headerbar einfügen */
+    adw_toolbar_view_add_top_bar(settings_toolbar, GTK_WIDGET(settings_header));
+
+    /* Inhalt einsetzen */
+    adw_toolbar_view_set_content(settings_toolbar, content);
+
+    /* NavigationPage anlegen */
+    AdwNavigationPage *settings_page =
+        adw_navigation_page_new(GTK_WIDGET(settings_toolbar), "Einstellungen");
+    gtk_widget_set_size_request(GTK_WIDGET(settings_page), 600, 280);
+
+    /* Rein in den Stack */
+    adw_navigation_view_push(nav, settings_page);
+}// Ende Einstellungen-Fenster
+
+
+
+
+/* ---- "find"-Kommando zusammenbauen ---> 
      Außerhalb von on_search_button_clicked, da sonst "nested-functions" innerhalb einer Funktion ensteht! */
     
 gchar *find_cmd = NULL;
@@ -194,7 +236,7 @@ static void action_C(const char *find_path, const char *query) { // find_path u.
 }
 
 
-/* ----- Callback Beenden-Button ----- */
+/* ----- Callback Beenden-Button ------------------------------------------------------- */
 static void on_quitbtn_clicked(GtkButton *button, gpointer user_data) 
     { 
     GtkWindow *win = GTK_WINDOW(user_data);
@@ -483,13 +525,15 @@ static void on_activate (AdwApplication *app, gpointer)
     AdwApplicationWindow *adw_win = ADW_APPLICATION_WINDOW (adw_application_window_new (GTK_APPLICATION (app))); 
 
     gtk_window_set_title (GTK_WINDOW(adw_win), "Finden");         // WM-Titel
-    gtk_window_set_default_size (GTK_WINDOW(adw_win), 480, 280);  // Standard-Fenstergröße
+    gtk_window_set_default_size (GTK_WINDOW(adw_win), 600, 280);  // Standard-Fenstergröße
     gtk_window_set_resizable (GTK_WINDOW (adw_win), FALSE);       // Skalierung nicht erlauben
-    gtk_window_present (GTK_WINDOW(adw_win));                     // Fenster anzeigen lassen
 
-    /* ----- ToolbarView (Root‑Widget) erstellt und als Inhalt des Fensters festgelegt -- */
-    AdwToolbarView *toolbar_view = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
-    adw_application_window_set_content (adw_win, GTK_WIDGET (toolbar_view));
+    /* ----- Navigation Root ----- */
+    AdwNavigationView *nav_view = ADW_NAVIGATION_VIEW(adw_navigation_view_new());
+    adw_application_window_set_content (adw_win, GTK_WIDGET(nav_view));
+
+    /* ----- ToolbarBarView als Hauptseite ----- */
+    AdwToolbarView *toolbar_view = ADW_TOOLBAR_VIEW(adw_toolbar_view_new());
 
     /* ----- HeaderBar mit TitelWidget erstellt und dem ToolbarView hinzugefügt ------------ */
     AdwHeaderBar *header = ADW_HEADER_BAR (adw_header_bar_new());
@@ -498,6 +542,10 @@ static void on_activate (AdwApplication *app, gpointer)
     adw_header_bar_set_title_widget (ADW_HEADER_BAR (header), GTK_WIDGET (title_label)); // Label einsetzen
     adw_toolbar_view_add_top_bar (toolbar_view, GTK_WIDGET (header));   // Header‑Bar zur Toolbar‑View hinzuf
 
+    /* Nav_View mit Inhalt wird zur Hauptseite */
+    AdwNavigationPage *main_page = adw_navigation_page_new(GTK_WIDGET(toolbar_view), "Finden");
+    adw_navigation_view_push(nav_view, main_page);
+
     /* --- Hamburger‑Button innerhalb der Headerbar --- */
     GtkMenuButton *menu_btn = GTK_MENU_BUTTON (gtk_menu_button_new ());
     gtk_menu_button_set_icon_name (menu_btn, "open-menu-symbolic");
@@ -505,24 +553,31 @@ static void on_activate (AdwApplication *app, gpointer)
 
     /* --- Popover‑Menu im Hamburger --- */
     GMenu *menu = g_menu_new ();
-    g_menu_append (menu, _("Über Finden"), "app.show-about");
+    g_menu_append (menu, _("Einstellungen     "), "app.show-settings");
+    g_menu_append (menu, _("Über Finden       "), "app.show-about");
     GtkPopoverMenu *popover = GTK_POPOVER_MENU (
     gtk_popover_menu_new_from_model (G_MENU_MODEL (menu)));
     gtk_menu_button_set_popover (menu_btn, GTK_WIDGET (popover));
 
     /* --- Action die den About‑Dialog öffnet --- */
-    const GActionEntry entries[] = {
-        { "show-about", show_about, NULL, NULL, NULL }
+    const GActionEntry about_entry[] = {
+     { "show-about", show_about, NULL, NULL, NULL }
     };
-    g_action_map_add_action_entries (G_ACTION_MAP (app), entries, G_N_ELEMENTS (entries), app);
+    g_action_map_add_action_entries (G_ACTION_MAP(app), about_entry, G_N_ELEMENTS(about_entry), app);
 
+    /* --- Action die die Einstellungen öffnet --- */
+    const GActionEntry settings_entry[] = {
+     { "show-settings", show_settings, NULL, NULL, NULL }
+    }; 
+    g_action_map_add_action_entries (G_ACTION_MAP(app), settings_entry, G_N_ELEMENTS(settings_entry), nav_view);
 
     /* ---- Haupt‑Box erstellen ----------------------------------------------------------- */
     GtkBox *mainbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
-    gtk_widget_set_margin_top    (GTK_WIDGET (mainbox), 20);
-    gtk_widget_set_margin_bottom (GTK_WIDGET (mainbox), 20);
-    gtk_widget_set_margin_start  (GTK_WIDGET (mainbox), 20);
-    gtk_widget_set_margin_end    (GTK_WIDGET (mainbox), 20);
+    gtk_box_set_spacing(GTK_BOX(mainbox), 15);                // Abstand zwischen allen Elementen (vertikal)
+    gtk_widget_set_margin_top    (GTK_WIDGET (mainbox), 12);
+    gtk_widget_set_margin_bottom (GTK_WIDGET (mainbox), 12);
+    gtk_widget_set_margin_start  (GTK_WIDGET (mainbox), 40);
+    gtk_widget_set_margin_end    (GTK_WIDGET (mainbox), 40);
     gtk_widget_set_hexpand (GTK_WIDGET (mainbox), TRUE);
     gtk_widget_set_vexpand (GTK_WIDGET (mainbox), TRUE);
 
@@ -621,19 +676,20 @@ static void on_activate (AdwApplication *app, gpointer)
     /* --- Schaltflächen-WidgetBox hier anlegen: ------------------------------ */
     GtkWidget *button_hbox = NULL;
     if (!button_hbox) {
-        button_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 12);
-        gtk_widget_set_hexpand(button_hbox, FALSE);                // nicht ausdehnen
-        gtk_widget_set_halign(button_hbox, GTK_ALIGN_CENTER);      // zentriert
+        button_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 50); // Abstand zwischen den Buttons
+        gtk_widget_set_hexpand(button_hbox, TRUE);                 // nicht ausdehnen!!
+        gtk_widget_set_vexpand(button_hbox, FALSE);
+        gtk_widget_set_halign(button_hbox, GTK_ALIGN_CENTER);
+
     }
 
     /* --- Schaltfläche-Finden:  ------------------------------------------------- */
-    GtkWidget *search_button = gtk_button_new_with_label (_("  Finden  "));
+    GtkWidget *search_button = gtk_button_new_with_label (_("     Finden     "));
 
      /* ----- Schaltfläche in Theme-Akzent-Farbe und Pill Class ------------------ */
     gtk_widget_add_css_class (search_button, "suggested-action");
-    //gtk_widget_add_css_class (search_button, "pill");
 
-    /* --- Schaltfläche verbinden --- */
+    /* --- Schaltfläche Finden verbinden --- */
     g_signal_connect(search_button, "clicked",
                       G_CALLBACK(on_search_button_clicked), refs); //user_data = refs
 
@@ -641,9 +697,8 @@ static void on_activate (AdwApplication *app, gpointer)
     g_signal_connect(search_entry,  "activate", G_CALLBACK(on_search_button_clicked), refs);
 
     /* ----- Schaltfläche Beenden erzeugen ----- */
-    GtkWidget *quit_button = gtk_button_new_with_label(_("Beenden"));
-    //gtk_widget_add_css_class (quit_button, "pill");
-    //gtk_widget_set_halign(quit_button, GTK_ALIGN_CENTER);
+    GtkWidget *quit_button = gtk_button_new_with_label(_("   Beenden   "));
+
     
     /* ---- Schaltfläche Signal verbinden ---- */
            // Methode um Anwendung mit jeglichen Instanzen zu schließen:
@@ -660,9 +715,15 @@ static void on_activate (AdwApplication *app, gpointer)
     gtk_box_append(GTK_BOX(button_hbox), quit_button);    
     gtk_box_append(GTK_BOX(button_hbox), search_button);
 
+
     /* --- Checkboxen am Search-Button speichern, damit im Callback diese auch abrufen werden --- */
     g_object_set_data(G_OBJECT(search_button), "root_check", root_check);
     g_object_set_data(G_OBJECT(search_button), "snapshots_check", snapshots_check);
+
+    /* ----- Spacer vor kommenden button_hbox ----- */
+    //GtkWidget *spacer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    //gtk_widget_set_size_request(spacer, -1, -1); // Breite unbegrenzt, Höhe in px
+    //gtk_box_append(GTK_BOX(mainbox), spacer);
 
     /* -----  Box zur ToolbarView hinzufügen ------------ */
     gtk_box_append(GTK_BOX(mainbox), button_hbox);
