@@ -8,7 +8,7 @@
  * Please note:
  * The Use of this code and execution of the applications is at your own risk, I accept no liability!
  *
- * Version 0.9.2
+ * Version 0.9.3
  */
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -137,9 +137,8 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     AdwApplication *app = ADW_APPLICATION (user_data);
     /* About‑Dialog anlegen */
     AdwAboutDialog *about = ADW_ABOUT_DIALOG (adw_about_dialog_new ());
-    //adw_about_dialog_set_body(about, "Hierbei handelt es sich um ein klitzekleines Testprojekt."); //nicht in meiner adw Version?
     adw_about_dialog_set_application_name (about, "Finden");
-    adw_about_dialog_set_version (about, "0.9.2");
+    adw_about_dialog_set_version (about, "0.9.3");
     adw_about_dialog_set_developer_name (about, "toq");
     adw_about_dialog_set_website (about, "https://github.com/super-toq");
 
@@ -182,76 +181,85 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     adw_dialog_present(ADW_DIALOG(about), GTK_WIDGET(parent));
 }//Ende About-Dialog
 
-/* ----- In Einstellungen Miniterm-Checkbox-Toggle -------------------------------------- */
-static void on_settings_miniterm_switch_toggled (GtkSwitch *miniterm_switch, GParamSpec *pspec, gpointer user_data)
+/* ----- In Einstellungen Miniterm-Schalter-Toggle -------------------------------------- */
+static void on_settings_miniterm_switch_row_toggled 
+                 (AdwSwitchRow *miniterm_switch_row, GParamSpec *pspec, gpointer user_data)
 {
-    g_cfg.miniterm_enable = gtk_switch_get_active (miniterm_switch);
-
-
+    gboolean active = adw_switch_row_get_active (miniterm_switch_row);
+    g_cfg.miniterm_enable = active;
 }
 /* ----- Einstellungen-Page ------------------------------------------------------------- */
 static void show_settings (GSimpleAction *action, GVariant *parameter, gpointer user_data)
 {
     AdwNavigationView *settings_nav = ADW_NAVIGATION_VIEW(user_data);
 
-    /* --- ToolbarView für Settings-Seite --- */
+    /* ----- ToolbarView für Settings-Seite ----- */
     AdwToolbarView *settings_toolbar = ADW_TOOLBAR_VIEW(adw_toolbar_view_new());
 
-    /* Headerbar erzeugen */
+    /* ----- Headerbar erzeugen ----- */
     AdwHeaderBar *settings_header = ADW_HEADER_BAR(adw_header_bar_new());
     GtkWidget *settings_label = gtk_label_new(_("Einstellungen"));
     gtk_widget_add_css_class(settings_label, "heading");
     adw_header_bar_set_title_widget(settings_header, settings_label);
 
-    /* Headerbar einfügen */
+    /* ----- Headerbar einfügen ----- */
     adw_toolbar_view_add_top_bar(settings_toolbar, GTK_WIDGET(settings_header));
 
-    /* --- Inhalt der Settings-Seite --- */
+    /* ----- Haupt-BOX der Settings-Seite ----- */
     GtkWidget *settings_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
     gtk_widget_set_margin_top(settings_box, 24);
     gtk_widget_set_margin_start(settings_box, 24);
+    gtk_widget_set_margin_end(settings_box, 24);
+    gtk_widget_set_margin_bottom(settings_box, 24);
 
-    /* Settings Label... */
-    GtkWidget *label = gtk_label_new(_("Terminaleinstellungen:"));
-    gtk_widget_add_css_class(label, "title-4");
-    gtk_box_append(GTK_BOX(settings_box), label);
+    /* ----- PreferencesGroup erstellen ----- */
+    AdwPreferencesGroup *settings_group = ADW_PREFERENCES_GROUP(adw_preferences_group_new());
+    adw_preferences_group_set_title(settings_group, _("Terminaleinstellungen"));
+    //adw_preferences_group_set_description (settings_group, _("Zusatzbeschreibung - Platzhalter"));
 
-    /* Settings-Schalter */
-    GtkWidget *miniterm_switch = gtk_switch_new ();
-    gtk_switch_set_active (GTK_SWITCH (miniterm_switch), g_cfg.miniterm_enable);
-    /* Switch ausrichten */
-    gtk_widget_set_valign (miniterm_switch, GTK_ALIGN_CENTER);
-    gtk_widget_set_hexpand (miniterm_switch, FALSE);
+    /* ----- AdwSwitchRow1-Miniterm - erzeugen ----- */
+    AdwSwitchRow *miniterm_switch_row = ADW_SWITCH_ROW(adw_switch_row_new());
+    adw_preferences_row_set_title(ADW_PREFERENCES_ROW(miniterm_switch_row), 
+                                       _("Miniterm als Terminal verwenden:"));
+    adw_action_row_set_subtitle(ADW_ACTION_ROW (miniterm_switch_row),
+     _("Wenn Sie Miniterm nicht benutzen wollen, wird automatisch das systemeigene Terminal verwendet."));
+    adw_switch_row_set_active(miniterm_switch_row, FALSE);
 
-    /* ActionRow erstellen */
-    AdwActionRow *row = ADW_ACTION_ROW (adw_action_row_new ());
-    adw_preferences_row_set_title (ADW_PREFERENCES_ROW (row), _("Miniterm als Terminal benutzen:"));
-    adw_action_row_add_suffix (row, miniterm_switch);
+    /* ----- AdwSwitchRow2-Testing - erzeugen ----- */
+    AdwSwitchRow *testing_switch_row = ADW_SWITCH_ROW(adw_switch_row_new());
+    adw_preferences_row_set_title (ADW_PREFERENCES_ROW(testing_switch_row), 
+                                       _("Testeinstellungen verwenden:"));
+    adw_action_row_set_subtitle(ADW_ACTION_ROW (testing_switch_row),
+     _("Dies ist eine Vorbereitung für eine kommende Funktion."));
+    adw_switch_row_set_active(testing_switch_row, FALSE);
+    gtk_widget_set_sensitive(GTK_WIDGET (testing_switch_row), FALSE); // erstmal deaktiviert
 
-    /* verbinden... */
-    g_signal_connect (miniterm_switch, "notify::active", G_CALLBACK(on_settings_miniterm_switch_toggled), NULL);
+    /* ----- AdwSwitchRow1-Miniterm verbinden... ----- */
+    g_signal_connect(miniterm_switch_row, "notify::active", 
+                                          G_CALLBACK(on_settings_miniterm_switch_row_toggled), NULL);
 
-    /* Row ins BOX-Widget einfügen */
-    GtkWidget *list_box = gtk_list_box_new ();
-    gtk_list_box_set_selection_mode (GTK_LIST_BOX (list_box), GTK_SELECTION_NONE);
-    gtk_list_box_append (GTK_LIST_BOX (list_box), GTK_WIDGET (row));
+    /* ----- AdwSwitchRow2-Testing verbinden... ----- */
+    //g_signal_connect(miniterm_switch_row, "notify::active", 
+    //                                      G_CALLBACK(on_settings_TESTING_switch_row_toggled), NULL);
 
-    /* ListBox in den übergeordneten Box-Container einfügen */
-    gtk_box_append (GTK_BOX (settings_box), list_box);
+    /* ----- SwitchRows zur PreferencesGruppe hinzufügen ----- */
+    adw_preferences_group_add(settings_group, GTK_WIDGET(miniterm_switch_row));
+    adw_preferences_group_add(settings_group, GTK_WIDGET(testing_switch_row));
 
-    /* Inhalt einsetzen */
+    /* ----- Pref.Gruppe in die Page einbauen ----- */
+    gtk_box_append(GTK_BOX(settings_box), GTK_WIDGET(settings_group));
+
+    /* ----- ToolbarView Inhalt setzen ----- */
     adw_toolbar_view_set_content(settings_toolbar, settings_box);
 
-    /* NavigationPage anlegen */
-    AdwNavigationPage *settings_page =
-    adw_navigation_page_new(GTK_WIDGET(settings_toolbar), _("Einstellungen"));
-    gtk_widget_set_size_request(GTK_WIDGET(settings_page), 600, 280);
+    /* ----- NavigationPage anlegen ----- */
+    AdwNavigationPage *settings_page = 
+                      adw_navigation_page_new(GTK_WIDGET(settings_toolbar), _("Einstellungen"));
+    gtk_widget_set_size_request(GTK_WIDGET(settings_page), 630, 280);
 
-    /* Page der Settings_nav hinzufügen */
+    /* ----- Page der Settings_nav hinzufügen ----- */
     adw_navigation_view_push(settings_nav, settings_page);
 }// Ende Einstellungen-Fenster
-
-
 
 
 /* ---- Kommando "find" zusammenbauen ---> 
@@ -267,7 +275,7 @@ static void action_A(const char *find_path, const char *query) { // find_path u.
                     hier innerhalb dieser Funktion eine Zeichenkette in "const gchar" ermittelt. */
 }
 
-    /* 5.2  find Kommando:   ([B] Root ohne Sanpashots)  */
+    /* 5.2  find Kommando:   ([B] Root ohne Snapshots)  */
 static void action_B(const char *find_path, const char *query) { // find_path u. query als Argumente bekommen.
     find_cmd = g_strdup_printf(
         "run0 --background=0 --unit=finden --via-shell %s / -path \"/.snapshots\" -prune -o -iname \"*%s*\"",
@@ -287,7 +295,7 @@ static void on_quitbtn_clicked(GtkButton *button, gpointer user_data)
     { 
     GtkWindow *win = GTK_WINDOW(user_data);
     gtk_window_destroy(win);
-
+    // Aufräumen:
     UiRefs *refs = g_object_get_data (G_OBJECT (button), "ui_refs");
     if (refs) g_free (refs);
     }
@@ -312,7 +320,7 @@ static void on_check_button_toggled (GtkCheckButton *toggle_check, gpointer user
 
     if (toggle_check == refs->snapshots_check)
     {
-        /* Optional: wenn Snapshots aktiviert wird, Root aktivieren */
+        /* Wenn Snapshots aktiviert wird, Root ebenfalls aktivieren */
         if (gtk_check_button_get_active (refs->snapshots_check))
             gtk_check_button_set_active (refs->root_check, TRUE);
         return;
@@ -330,7 +338,7 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
 
     const gchar *query = gtk_editable_get_text(GTK_EDITABLE(refs->search_entry));
     if (!query || *query == '\0') {
-        g_print(_("Bitte einen Suchbegriff eingeben.\n"));
+        g_print("Please enter a search term\n");
         return;
     }
 
@@ -429,7 +437,7 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
 
         case ROOT_NO_RUN0: // ROOT=1, RUN0=0, somit auch keine Snapshots
         {
-            g_print("Service run0 not enabled\n");
+            g_print("Service run0 not available\n");
 
             /* Checkbox zurücksetzen */
             gtk_check_button_set_active(refs->root_check, FALSE);
@@ -457,7 +465,7 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
             break;
 
        case ROOT_RUN0_SNAPSHOTS_OK: // ROOT=1, RUN0=1, SNAPSHOTS=1
-            g_print("Service run0 is available\nSearching in path \".snapshots\" is enabled\n");
+            g_print("Service run0 is available\nSearching in path \".snapshots\" is activated\n");
             /* find Kommando [C] verwenden  */
             cmd_action = action_C; // action_C wird in "static void action_C" definiert
             break;
@@ -561,7 +569,7 @@ static void on_activate (AdwApplication *app, gpointer)
     AdwApplicationWindow *adw_win = ADW_APPLICATION_WINDOW (adw_application_window_new (GTK_APPLICATION (app))); 
 
     gtk_window_set_title (GTK_WINDOW(adw_win), "Finden");         // WM-Titel
-    gtk_window_set_default_size (GTK_WINDOW(adw_win), 600, 280);  // Standard-Fenstergröße
+    gtk_window_set_default_size (GTK_WINDOW(adw_win), 630, 280);  // Standard-Fenstergröße
     gtk_window_set_resizable (GTK_WINDOW (adw_win), FALSE);       // Skalierung nicht erlauben
 
     /* --- Navigation Root ----- */
@@ -590,7 +598,7 @@ static void on_activate (AdwApplication *app, gpointer)
     /* --- Popover‑Menu im Hamburger --- */
     GMenu *menu = g_menu_new ();
     g_menu_append (menu, _("Einstellungen     "), "app.show-settings");
-    g_menu_append (menu, _("Über Finden       "), "app.show-about");
+    g_menu_append (menu, _("Infos zu Finden       "), "app.show-about");
     GtkPopoverMenu *popover = GTK_POPOVER_MENU (
     gtk_popover_menu_new_from_model (G_MENU_MODEL (menu)));
     gtk_menu_button_set_popover (menu_btn, GTK_WIDGET (popover));
@@ -609,11 +617,11 @@ static void on_activate (AdwApplication *app, gpointer)
 
     /* ---- Haupt‑Box erstellen ----------------------------------------------------------- */
     GtkBox *mainbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
-    gtk_box_set_spacing(GTK_BOX(mainbox), 15);                // Abstand zwischen allen Elementen (vertikal)
+    gtk_box_set_spacing(GTK_BOX(mainbox), 12);                // Abstand zwischen allen Elementen (vertikal)
     gtk_widget_set_margin_top    (GTK_WIDGET (mainbox), 12);
     gtk_widget_set_margin_bottom (GTK_WIDGET (mainbox), 12);
-    gtk_widget_set_margin_start  (GTK_WIDGET (mainbox), 40);
-    gtk_widget_set_margin_end    (GTK_WIDGET (mainbox), 40);
+    gtk_widget_set_margin_start  (GTK_WIDGET (mainbox), 12);
+    gtk_widget_set_margin_end    (GTK_WIDGET (mainbox), 12);
     gtk_widget_set_hexpand (GTK_WIDGET (mainbox), TRUE);
     gtk_widget_set_vexpand (GTK_WIDGET (mainbox), TRUE);
 
@@ -629,7 +637,7 @@ static void on_activate (AdwApplication *app, gpointer)
     gtk_image_set_pixel_size (GTK_IMAGE (smiley), 32);   // Smiley Größe
 
     /* ----- BOX-Widget für Text und Smiley erstellen ----- */
-    GtkBox *smileytext_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6));
+    GtkBox *smileytext_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6)); // Abstand Icon
     gtk_widget_set_halign (GTK_WIDGET (smileytext_box), GTK_ALIGN_CENTER);
     gtk_widget_set_valign (GTK_WIDGET (smileytext_box), GTK_ALIGN_CENTER);
 
@@ -647,8 +655,8 @@ static void on_activate (AdwApplication *app, gpointer)
     if (!search_entry) {
     /* Suchfeld */
         search_entry = gtk_search_entry_new ();
-        gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_entry),
-                                       _("Suchbegriff eingeben …"));
+        gtk_search_entry_set_placeholder_text (GTK_SEARCH_ENTRY (search_entry), 
+                                                  _("Suchbegriff eingeben …"));
         gtk_widget_set_hexpand (search_entry, TRUE);
         gtk_widget_set_halign (search_entry, GTK_ALIGN_FILL);
         gtk_widget_set_size_request (search_entry, 300, -1);
@@ -678,12 +686,12 @@ static void on_activate (AdwApplication *app, gpointer)
     }
 
     /* --- (1.)Kontrallkästchen/Checkbox mit Namen "Ignoriere Snapshots" erstellen --- */
-    GtkWidget *snapshots_check = gtk_check_button_new_with_label(_("Snapshots einbeziehen"));
+    GtkWidget *snapshots_check = gtk_check_button_new_with_label(_("Snapshots-Pfad durchsuchen"));
     gtk_widget_add_css_class (snapshots_check, "selection-mode");
     gtk_check_button_set_active (GTK_CHECK_BUTTON(snapshots_check), FALSE);
 
      /* --- (2.)Kontrollkästchen/Checkbox mit Namen "root" erstellen --- */
-    GtkWidget *root_check = gtk_check_button_new_with_label(_("System einbeziehen"));
+    GtkWidget *root_check = gtk_check_button_new_with_label(_("System-Pfad durchsuchen"));
     gtk_widget_add_css_class (root_check, "selection-mode");
     gtk_check_button_set_active (GTK_CHECK_BUTTON(root_check), FALSE);
 
@@ -712,8 +720,9 @@ static void on_activate (AdwApplication *app, gpointer)
     /* --- Schaltflächen-WidgetBox hier anlegen: ------------------------------ */
     GtkWidget *button_hbox = NULL;
     if (!button_hbox) {
-        button_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 50); // Abstand zwischen den Buttons
-        gtk_widget_set_hexpand(button_hbox, TRUE);                 // nicht ausdehnen!!
+        button_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 48); // Abstand zwischen den Buttons
+        gtk_widget_set_margin_top     (GTK_WIDGET (button_hbox), 24); // Abstand zwischen den Boxen
+        gtk_widget_set_hexpand(button_hbox, FALSE);                 // nicht ausdehnen!!
         gtk_widget_set_vexpand(button_hbox, FALSE);
         gtk_widget_set_halign(button_hbox, GTK_ALIGN_CENTER);
 
@@ -786,8 +795,8 @@ int main (int argc, char **argv)
 
     init_environment(); // Environment ermitteln, global in config.c
     init_config();      // Config File laden/erstellen in config.c
-        g_print ("Config miniterm value: %s\n", g_cfg.miniterm_enable ? "true" : "false"); // testen !!
-        g_print ("Config test value: %s\n", g_cfg.test_enable ? "true" : "false"); // testen !!
+        g_print ("Settings load miniterm value: %s\n", g_cfg.miniterm_enable ? "true" : "false"); // testen !!
+        g_print ("Settings load test value: %s\n", g_cfg.test_enable ? "true" : "false"); // testen !!
     //save_config ();     // Config File speichern in config.c // hier noch als Test !!
 
     /* ----- Erstelle den Pfad zu den locale-Dateien ----------------------------------- */

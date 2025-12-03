@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <toq@mailbox.org>, 2025-11-02
+# FIRST AUTHOR <toq@mailbox.org>, 2025-11-03
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: 3\n"
+"Project-Id-Version: 4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-02 19:52+0100\n"
+"POT-Creation-Date: 2025-12-03 14:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: super-toq <toq@mailbox.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,70 +21,81 @@ msgstr ""
 msgid "Abbrechen"
 msgstr "Anuluj"
 
-#: main.c:209 main.c:255
+#: main.c:201 main.c:257
 msgid "Einstellungen"
 msgstr "Ustawienia"
 
-#: main.c:222
-msgid "Terminaleinstellungen:"
-msgstr "Ustawienia terminala:"
+#: main.c:217
+msgid "Terminaleinstellungen"
+msgstr "Ustawienia terminala"
 
-#: main.c:235
-msgid "Miniterm als Terminal benutzen:"
+#: main.c:223
+msgid "Miniterm als Terminal verwenden:"
 msgstr "Użyj Miniterm jako terminala:"
 
-#: main.c:340
-msgid "Bitte einen Suchbegriff eingeben.\n"
-msgstr "Wpisz szukane hasło\n"
+#: main.c:225
+msgid ""
+"Wenn Sie Miniterm nicht benutzen wollen, wird automatisch das systemeigene "
+"Terminal verwendet."
+msgstr ""
+"Jeśli nie chcesz używać Miniterm, automatycznie używane jest "
+"Terminal systemowy."
+#: main.c:231
+msgid "Testeinstellungen verwenden:"
+msgstr ""
 
-#: main.c:449
+#: main.c:233
+msgid "Dies ist eine Vorbereitung für eine kommende Funktion."
+msgstr ""
+
+#: main.c:450
 msgid "Run0 nicht aktiviert"
 msgstr "Run0 nieaktywny"
 
-#: main.c:450
+#: main.c:451
 msgid ""
 "Der Service Run0 ist nicht aktiv,\n"
 "bitte überprüfen Sie Ihre Systemkonfiguration.\n"
 msgstr ""
 "Usługa Run0 nie jest aktywna,\n"
 "sprawdź konfigurację systemu.\n"
-#: main.c:512
+#: main.c:513
 msgid "Kein Terminal gefunden"
 msgstr "Nie znaleziono terminala"
 
-#: main.c:513
+#: main.c:514
 msgid ""
 "Es konnte kein unterstütztes Terminal auf diesem System gefunden werden!"
 msgstr "Nie znaleziono żadnego obsługiwanego terminala w tym systemie!"
 
-#: main.c:599
+#: main.c:600
 msgid "Einstellungen     "
 msgstr "Ustawienia        "
 
-#: main.c:600
-msgid "Über Finden       "
+#: main.c:601
+msgid "Infos zu Finden       "
 msgstr "O Finden         "
 
-#: main.c:629
+#: main.c:630
 msgid "<b>Finden statt Suchen</b>"
 msgstr "<b>Znajdowanie zamiast Szukania</b>"
 
-#: main.c:658
+#: main.c:659
 msgid "Suchbegriff eingeben …"
 msgstr "Wpisz frazę …"
 
-#: main.c:688
-msgid "Snapshots einbeziehen"
+#: main.c:689
+msgid "Snapshots-Pfad durchsuchen"
 msgstr "Uwzględnij folder snapshots"
 
-#: main.c:693
-msgid "System einbeziehen"
+#: main.c:694
+msgid "System-Pfad durchsuchen"
 msgstr "Uwzględnij folder system"
 
-#: main.c:730
+#: main.c:732
 msgid "     Finden     "
 msgstr " Znajdować "
 
-#: main.c:743
+#: main.c:745
 msgid "   Beenden   "
 msgstr "   Zakończ   "

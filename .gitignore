@@ -1,3 +1,4 @@
+src/resources_recompiled/
 _build/
 _build-dir/
 .flatpak/
@@ -7,5 +8,5 @@ _repo/
 src/free.toq.finden.gresource.c
 src/finden
 src/toq-finden
-src/toq-miniterm
+src/miniterm/toq-miniterm
 free.toq.finden.flatpak
