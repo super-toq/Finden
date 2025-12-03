@@ -8,7 +8,7 @@
  * Please note:
  * The Use of this code and execution of the applications is at your own risk, I accept no liability!
  *
- * Version 0.9.3
+ * Version 0.9.4
  */
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -138,7 +138,7 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     /* About‑Dialog anlegen */
     AdwAboutDialog *about = ADW_ABOUT_DIALOG (adw_about_dialog_new ());
     adw_about_dialog_set_application_name (about, "Finden");
-    adw_about_dialog_set_version (about, "0.9.3");
+    adw_about_dialog_set_version (about, "0.9.4");
     adw_about_dialog_set_developer_name (about, "toq");
     adw_about_dialog_set_website (about, "https://github.com/super-toq");
 
@@ -181,12 +181,15 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     adw_dialog_present(ADW_DIALOG(about), GTK_WIDGET(parent));
 }//Ende About-Dialog
 
-/* ----- In Einstellungen Miniterm-Schalter-Toggle -------------------------------------- */
-static void on_settings_miniterm_switch_row_toggled 
-                 (AdwSwitchRow *miniterm_switch_row, GParamSpec *pspec, gpointer user_data)
+/* ----- In Einstellungen: Miniterm-Schalter-Toggle ------------------------------------- */
+static void
+on_settings_miniterm_switch_row_toggled (GObject *object, GParamSpec *pspec, gpointer user_data)
 {
-    gboolean active = adw_switch_row_get_active (miniterm_switch_row);
+    AdwSwitchRow *miniterm_switch_row = ADW_SWITCH_ROW(object);
+    gboolean active = adw_switch_row_get_active(miniterm_switch_row);
     g_cfg.miniterm_enable = active;
+    save_config (); // speichern
+    //g_print ("Settings changed: miniterm value %s\n", g_cfg.miniterm_enable ? "true" : "false"); // testen !!
 }
 /* ----- Einstellungen-Page ------------------------------------------------------------- */
 static void show_settings (GSimpleAction *action, GVariant *parameter, gpointer user_data)
@@ -223,7 +226,8 @@ static void show_settings (GSimpleAction *action, GVariant *parameter, gpointer 
                                        _("Miniterm als Terminal verwenden:"));
     adw_action_row_set_subtitle(ADW_ACTION_ROW (miniterm_switch_row),
      _("Wenn Sie Miniterm nicht benutzen wollen, wird automatisch das systemeigene Terminal verwendet."));
-    adw_switch_row_set_active(miniterm_switch_row, FALSE);
+    /* Schalter-Aktivierung abhängig von gesetzten g_cfg.miniterm_enable Wert: */
+    adw_switch_row_set_active(ADW_SWITCH_ROW(miniterm_switch_row), g_cfg.miniterm_enable);
 
     /* ----- AdwSwitchRow2-Testing - erzeugen ----- */
     AdwSwitchRow *testing_switch_row = ADW_SWITCH_ROW(adw_switch_row_new());
@@ -231,15 +235,18 @@ static void show_settings (GSimpleAction *action, GVariant *parameter, gpointer 
                                        _("Testeinstellungen verwenden:"));
     adw_action_row_set_subtitle(ADW_ACTION_ROW (testing_switch_row),
      _("Dies ist eine Vorbereitung für eine kommende Funktion."));
+    /* Schalter-Aktivierung abhängig von gesetzten g_cfg.testing_enable Wert: */
+    //adw_switch_row_set_active(ADW_SWITCH_ROW(miniterm_switch_row), g_cfg.miniterm_enable);
+    // Vorerst deaktiv, später löschen:
     adw_switch_row_set_active(testing_switch_row, FALSE);
-    gtk_widget_set_sensitive(GTK_WIDGET (testing_switch_row), FALSE); // erstmal deaktiviert
+    gtk_widget_set_sensitive(GTK_WIDGET (testing_switch_row), FALSE);
 
     /* ----- AdwSwitchRow1-Miniterm verbinden... ----- */
     g_signal_connect(miniterm_switch_row, "notify::active", 
                                           G_CALLBACK(on_settings_miniterm_switch_row_toggled), NULL);
 
     /* ----- AdwSwitchRow2-Testing verbinden... ----- */
-    //g_signal_connect(miniterm_switch_row, "notify::active", 
+    //g_signal_connect(testing_switch_row, "notify::active", 
     //                                      G_CALLBACK(on_settings_TESTING_switch_row_toggled), NULL);
 
     /* ----- SwitchRows zur PreferencesGruppe hinzufügen ----- */
