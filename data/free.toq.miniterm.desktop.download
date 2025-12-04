@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=miniterm
+Comment=Minit Terminal
+Exec=toq-miniterm
+Icon=free.toq.miniterm
+Terminal=false
+NoDisplay=true
+Type=Application
+Categories=Utility;

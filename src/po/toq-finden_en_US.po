@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <toq@mailbox.org>, 2025-11-03
+# FIRST AUTHOR <toq@mailbox.org>, 2025-11-04
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: 4\n"
+"Project-Id-Version: 5\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-03 14:13+0100\n"
+"POT-Creation-Date: 2025-12-04 11:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: super-toq <toq@mailbox.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,84 +17,90 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: main.c:122
+#: main.c:124
 msgid "Abbrechen"
 msgstr "Cancel"
 
-#: main.c:201 main.c:257
+#: main.c:205 main.c:265
 msgid "Einstellungen"
 msgstr "Settings"
 
-#: main.c:217
+#: main.c:221
 msgid "Terminaleinstellungen"
 msgstr "Terminal settings"
 
-#: main.c:223
+#: main.c:227
 msgid "Miniterm als Terminal verwenden:"
-msgstr "Using Miniterm as terminal:"
+msgstr "Using Miniterm as terminal"
 
-#: main.c:225
+#: main.c:229
 msgid ""
 "Wenn Sie Miniterm nicht benutzen wollen, wird automatisch das systemeigene "
 "Terminal verwendet."
 msgstr ""
-"If you do not want to use Miniterm, the system's built-in terminal " 
-"will be used automatically."
-#: main.c:231
+"If you do not want to use Miniterm, the system's built-in terminal will be "
+"used automatically."
+
+#: main.c:236
 msgid "Testeinstellungen verwenden:"
 msgstr ""
 
-#: main.c:233
+#: main.c:238
 msgid "Dies ist eine Vorbereitung für eine kommende Funktion."
 msgstr ""
 
-#: main.c:450
+#: main.c:504
 msgid "Run0 nicht aktiviert"
 msgstr "Run0 not activated"
 
-#: main.c:451
+#: main.c:505
 msgid ""
 "Der Service Run0 ist nicht aktiv,\n"
 "bitte überprüfen Sie Ihre Systemkonfiguration.\n"
 msgstr ""
-
-#: main.c:513
+"The service Run0 is not active,\n"
+"please check your system configuration.\n"
+#: main.c:567
 msgid "Kein Terminal gefunden"
 msgstr "No terminal found"
 
-#: main.c:514
+#: main.c:568
 msgid ""
 "Es konnte kein unterstütztes Terminal auf diesem System gefunden werden!"
 msgstr "No supported terminal could be found on this system!"
 
-#: main.c:600
+#: main.c:656
 msgid "Einstellungen     "
 msgstr "Settings          "
 
-#: main.c:601
+#: main.c:657
 msgid "Infos zu Finden       "
 msgstr "About Finden      "
 
-#: main.c:630
+#: main.c:686
 msgid "<b>Finden statt Suchen</b>"
 msgstr "<b>Finding instead of Searching</b>"
 
-#: main.c:659
+#: main.c:715
 msgid "Suchbegriff eingeben …"
 msgstr "Enter search term …"
 
-#: main.c:689
-msgid "Snapshots-Pfad durchsuchen"
-msgstr "Search .snapshots path"
+#: main.c:744
+msgid "Suche in Snapshots"
+msgstr "Search in .snapshots path"
 
-#: main.c:694
-msgid "System-Pfad durchsuchen"
+#: main.c:750
+msgid "Suche in System"
 msgstr "Search system path"
 
-#: main.c:732
+#: main.c:761
+msgid "Exakte Übereinstimmung"
+msgstr "Exact match"
+
+#: main.c:800
 msgid "     Finden     "
 msgstr "   Now find   "
 
-#: main.c:745
+#: main.c:811
 msgid "   Beenden   "
-msgstr "    Quit    "
+msgstr "     Quit     "

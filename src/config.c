@@ -14,7 +14,7 @@ static GKeyFile *key_file   = NULL;    /* In‑Memory‑Repräsentation der Date
 /* ----- Globale Struktur der Keys ---------- */
 FindConfig g_cfg = {
     .miniterm_enable = FALSE,  // Standard-Wert, falls alles fehlschlägt
-    .test_enable      = FALSE
+    .test_enable     = FALSE
 };
 /* ----- Getter für app_dir ---------------- */
 const gchar *get_app_dir (void)
@@ -65,7 +65,7 @@ void init_config (void)
     /* ----- GKeyFile anlegen ------------------------------ */
     key_file = g_key_file_new ();
 
-    /* ----- Vorhandene Datei laden (falls vorhanden) ----- */
+    /* ----- Datei laden (falls vorhanden) ----- */
     if (g_file_test (config_path, G_FILE_TEST_IS_REGULAR)) {
         GError *err = NULL;
         if (!g_key_file_load_from_file (key_file, config_path, G_KEY_FILE_KEEP_COMMENTS, &err)) {

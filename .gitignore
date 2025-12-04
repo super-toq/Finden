@@ -1,10 +1,10 @@
-src/resources_recompiled/
 _build/
 _build-dir/
 .flatpak/
 .flatpak-builder/
 _tmp/
 _repo/
+src/precompiled/
 src/free.toq.finden.gresource.c
 src/finden
 src/toq-finden

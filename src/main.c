@@ -8,7 +8,7 @@
  * Please note:
  * The Use of this code and execution of the applications is at your own risk, I accept no liability!
  *
- * Version 0.9.4
+ * Version 0.9.5
  */
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -27,6 +27,7 @@ typedef struct {     // Widget-Zeigern erstellten...
     GtkEditable     *search_entry; // zeigt auf GtkEditable ...
     GtkCheckButton  *root_check;
     GtkCheckButton  *snapshots_check;
+    GtkCheckButton  *exact_check;
 } UiRefs;
 
 static gchar       *glob_term_path = NULL;  // terminal Pfad global ermittelt
@@ -35,6 +36,7 @@ static gchar       *glob_path_miniterm = NULL;  // miniterm Pfad
 static const gchar *glob_mini     = NULL;   // miniterm local
 static const char  *flatpak_id     = NULL;  // ID...
 static gboolean    is_flatpak     = FALSE;  // 1 oder 0 ausgeben
+
 
 /* Hinweis, aus config.c: 
   g_cfg.miniterm_enable
@@ -138,7 +140,7 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     /* About‑Dialog anlegen */
     AdwAboutDialog *about = ADW_ABOUT_DIALOG (adw_about_dialog_new ());
     adw_about_dialog_set_application_name (about, "Finden");
-    adw_about_dialog_set_version (about, "0.9.4");
+    adw_about_dialog_set_version (about, "0.9.5");
     adw_about_dialog_set_developer_name (about, "toq");
     adw_about_dialog_set_website (about, "https://github.com/super-toq");
 
@@ -182,8 +184,7 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
 }//Ende About-Dialog
 
 /* ----- In Einstellungen: Miniterm-Schalter-Toggle ------------------------------------- */
-static void
-on_settings_miniterm_switch_row_toggled (GObject *object, GParamSpec *pspec, gpointer user_data)
+static void on_settings_miniterm_switch_row_toggled (GObject *object, GParamSpec *pspec, gpointer user_data)
 {
     AdwSwitchRow *miniterm_switch_row = ADW_SWITCH_ROW(object);
     gboolean active = adw_switch_row_get_active(miniterm_switch_row);
@@ -262,7 +263,7 @@ static void show_settings (GSimpleAction *action, GVariant *parameter, gpointer 
     /* ----- NavigationPage anlegen ----- */
     AdwNavigationPage *settings_page = 
                       adw_navigation_page_new(GTK_WIDGET(settings_toolbar), _("Einstellungen"));
-    gtk_widget_set_size_request(GTK_WIDGET(settings_page), 630, 280);
+    gtk_widget_set_size_request(GTK_WIDGET(settings_page), 630, 305);
 
     /* ----- Page der Settings_nav hinzufügen ----- */
     adw_navigation_view_push(settings_nav, settings_page);
@@ -272,29 +273,74 @@ static void show_settings (GSimpleAction *action, GVariant *parameter, gpointer 
 /* ---- Kommando "find" zusammenbauen ---> 
  Außerhalb von on_search_button_clicked, da sonst "nested-functions" innerhalb einer Funktion ensteht! --- */
     
+/* Global, aber nicht thread übergreifend */
 gchar *find_cmd = NULL;
+const gchar *iname_option = FALSE;
+gchar *iname_query = NULL;
 
     /* 5.1  find Kommando:   ([A] ohne Root, nur im Homeverzeichnis)  */
-static void action_A(const char *find_path, const char *query) { // find_path u. query als Argumente bekommen.
-    find_cmd = g_strdup_printf("%s %s -iname \"*%s*\"", 
-       find_path, g_get_home_dir(), query); 
-                 /* g_get_home_dir() ist Funktion aus GLib, welche direkt
-                    hier innerhalb dieser Funktion eine Zeichenkette in "const gchar" ermittelt. */
-}
+static void action_A(const char *find_path, const char *query, UiRefs *refs)  
+{ // find_path u. query als Argumente bekommen.
+
+    gboolean exact_active = FALSE;
+
+    if (GTK_IS_CHECK_BUTTON(refs->exact_check)) exact_active = gtk_check_button_get_active(refs->exact_check);
+    if (exact_active) {
+       iname_option = "-name";
+       iname_query = g_strdup_printf ("%s \"%s\"", iname_option, query);
+    } else {
+       iname_option = "-iname";
+       iname_query = g_strdup_printf ("%s \"*%s*\"", iname_option, query);
+    }
+    find_cmd = g_strdup_printf("%s %s %s", 
+       find_path, g_get_home_dir(), iname_query); 
+                 /* g_get_home_dir() ist Funktion aus GLib, 
+                    welche innerhalb dieser Funktion eine Zeichenkette in "const gchar" ermittelt. */
+    g_free (iname_query);
+} // Hinweis: g_free(find_cmd) erfolgt in Suchfunktion;
 
     /* 5.2  find Kommando:   ([B] Root ohne Snapshots)  */
-static void action_B(const char *find_path, const char *query) { // find_path u. query als Argumente bekommen.
+static void action_B(const char *find_path, const char *query, UiRefs *refs) 
+{ // find_path u. query als Argumente bekommen.
+
+    gboolean exact_active = FALSE;
+
+    if (GTK_IS_CHECK_BUTTON(refs->exact_check)) exact_active = gtk_check_button_get_active(refs->exact_check);
+    if (exact_active) {
+       iname_option = "-name";
+       iname_query = g_strdup_printf ("%s \"%s\"", iname_option, query);
+    } else {
+       iname_option = "-iname";
+       iname_query = g_strdup_printf ("%s \"*%s*\"", iname_option, query);
+    }
+
     find_cmd = g_strdup_printf(
-        "run0 --background=0 --unit=finden --via-shell %s / -path \"/.snapshots\" -prune -o -iname \"*%s*\"",
-        find_path, query); 
-}
+    "run0 --background=0 --unit=finden --via-shell %s / -path \"/.snapshots\" -prune -o %s",
+        find_path, iname_query);
+
+    g_free (iname_query);
+} // Hinweis: g_free(find_cmd) erfolgt in Suchfunktion;
         
     /* 5.3  find Kommando:   ([C] Root + Snapshots)  */
-static void action_C(const char *find_path, const char *query) { // find_path u. query als Argumente bekommen.
+static void action_C(const char *find_path, const char *query, UiRefs *refs) 
+{ // find_path u. query als Argumente bekommen.
+
+    gboolean exact_active = FALSE;
+
+    if (GTK_IS_CHECK_BUTTON(refs->exact_check)) exact_active = gtk_check_button_get_active(refs->exact_check);
+    if (exact_active) {
+       iname_option = "-name";
+       iname_query = g_strdup_printf ("%s \"%s\"", iname_option, query);
+    } else {
+       iname_option = "-iname";
+       iname_query = g_strdup_printf ("%s \"*%s*\"", iname_option, query);
+    }
+
     find_cmd = g_strdup_printf(
-        "run0 --background=0 --unit=finden --via-shell %s / -iname \"*%s*\"", 
-        find_path, query); 
-}
+    "run0 --background=0 --unit=finden --via-shell %s / %s", find_path, iname_query); 
+
+    g_free (iname_query);
+} // Hinweis: g_free(find_cmd) erfolgt in Suchfunktion;
 
 
 /* ----- Callback Beenden-Button ------------------------------------------------------- */
@@ -310,7 +356,8 @@ static void on_quitbtn_clicked(GtkButton *button, gpointer user_data)
 /* ----- Callback für beide Kontrollkästchen (Toggle) ----------------------------------- */
 static void on_check_button_toggled (GtkCheckButton *toggle_check, gpointer user_data) 
 {
-    UiRefs *refs = user_data;               /* jetzt wirklich ein UiRefs‑Zeiger */
+    /* UiRefs Zeiger */
+    UiRefs *refs = user_data; 
 
     /* Fokus zurück auf das Suchfeld */
     gtk_widget_grab_focus (GTK_WIDGET (refs->search_entry));
@@ -356,7 +403,7 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
     gchar *find_path = g_find_program_in_path (find_prog);
     if (!find_path) {
         const gchar *fallback = "/usr/bin/find";
-        if (g_file_test (fallback, G_FILE_TEST_IS_EXECUTABLE))
+        if (g_file_test (fallback, G_FILE_TEST_IS_EXECUTABLE)) // auf Ausführbarkeit testen
             find_path = g_strdup (fallback);
     }
     if (!find_path) {
@@ -416,7 +463,7 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
     }
 
     /* ---- 4. Schalter aus 3.x - für ROOT, RUN0, SNAPSHOTS + Find-Kommande ---- */
-    void (*cmd_action)(const char *, const char *) = NULL;
+    void (*cmd_action)(const char *, const char *, UiRefs *) = NULL;
     cmd_action = action_A; // Find-Kommando [A] wird in "static void action_A" definiert
     // Diese Maßnahme war notwendig, da sonst nested-Fuction innerhalb einer Funktion entsteht!
 
@@ -479,7 +526,7 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
     } // Switch(mode) Ende
 
     /* 5. ---- Aktion für das find-Kommando aufrufen ---- */
-    if (cmd_action) cmd_action(find_path, query);  
+    if (cmd_action) cmd_action(find_path, query, refs);  
 
  /* Hinweis - cmd_action beinhaltet:
     action_A:
@@ -525,10 +572,12 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
    }
 
 
-    /* 7. ---- Terminal starten ---------------------------------------------------------------------- */
+    /* 7. ---- Terminal starten ------------------------------------------------------- */
              /* mit "exec bash" neuer Bash-Shell starten, dadurch Terminal aktiv halten */
     gchar *full_cmd = g_strdup_printf ("%s; exec bash", find_cmd);
-//    g_print ("full_cmd: %s\n", full_cmd);  //testen
+
+    /* komplettes Kommando überprüfen */
+    g_print ("full_cmd: %s\n", full_cmd);  //testen
 
     /* ----- Argumentliste vorbereiten --------------------*/
     /* argv = "/usr/bin/gnome-terminal -- bash -c "/usr/bin/find / -iname \"*example*\"; exec bash"" */
@@ -559,7 +608,7 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
     /* term_path ist Ergebnis von g_find_program_in_path(), welches ein Zeiger auf glob_term_path hat!
        Lösung zum Eigentum erlangen und anschließend leeren: */
     term_path = g_strdup(term_path);
-    g_free (term_path); // < fehler
+    g_free (term_path); 
     
 
     /* find_cmd und full_cmd einmalig freigeben (full_cmd wurde bereits durch argv-loop freigegeben!)*/
@@ -576,7 +625,7 @@ static void on_activate (AdwApplication *app, gpointer)
     AdwApplicationWindow *adw_win = ADW_APPLICATION_WINDOW (adw_application_window_new (GTK_APPLICATION (app))); 
 
     gtk_window_set_title (GTK_WINDOW(adw_win), "Finden");         // WM-Titel
-    gtk_window_set_default_size (GTK_WINDOW(adw_win), 630, 280);  // Standard-Fenstergröße
+    gtk_window_set_default_size (GTK_WINDOW(adw_win), 630, 305);  // Standard-Fenstergröße
     gtk_window_set_resizable (GTK_WINDOW (adw_win), FALSE);       // Skalierung nicht erlauben
 
     /* --- Navigation Root ----- */
@@ -654,7 +703,7 @@ static void on_activate (AdwApplication *app, gpointer)
 
     gtk_box_append (GTK_BOX (mainbox), GTK_WIDGET (smileytext_box));
 
-    /* ----- Suchleiste + Root‑Checkbutton oberhalb der Schaltfläche (horizontal) ----- */
+    /* ----- Suchleiste + Root‑Checkbutton oberhalb der Schaltfläche (horizontal) ---------- */
     GtkWidget *search_entry = NULL;   // Suchleisten-Widget
     GtkWidget *search_box   = NULL;   // Box-Widget in der sich die Suchleiste befindet
     GtkWidget *checkb_box = NULL;     // Box-Widget für Checkboxen
@@ -677,37 +726,48 @@ static void on_activate (AdwApplication *app, gpointer)
         /* Widgets nur hier einfügen – danach besitzen sie einen Eltern‑Container */
         gtk_box_append (GTK_BOX (search_box), search_entry);
     }
-
-    /* Das bereits vorbereitete horizontale Box‑Widget in die vertikale Haupt‑Box einfügen */
+    /* horizontale Search-BOX in die vertikale Haupt-BOX einfügen */
     gtk_box_append (mainbox, search_box);
 
-    /* --- Horizontales Box-Widget für Checkboxen hier erzeugen ------------------------- */
-    if (!checkb_box) { 
-        checkb_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6); 
-        gtk_widget_set_hexpand(checkb_box, TRUE);
+    /* --- Horizontales Haupt-Box-Widget für Checkboxen erstellen -------------------------- */
+    GtkWidget *cb_hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
+    gtk_widget_set_hexpand (cb_hbox, TRUE);          // Ausdehnung in die Breite
+    gtk_widget_set_halign (cb_hbox, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (cb_hbox, GTK_ALIGN_START);
 
-        /* Zentrierung der Widgetbox, wirkt sich auf die darin bef. Kontrollkästchen aus */
-        gtk_widget_set_hexpand (checkb_box, FALSE);            //  nicht autom. Ausdehnen
-        gtk_widget_set_halign (checkb_box, GTK_ALIGN_CENTER);  // zentrieren
-        gtk_widget_set_valign (checkb_box, GTK_ALIGN_CENTER);
-    }
+    /* ----- Linke innere vertikale Box für Checkboxen ------------------------------------- */
+    GtkWidget *vbox_inside_left = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+    gtk_widget_set_hexpand (vbox_inside_left, FALSE);    // Ausdehnung in die Breite
+    gtk_widget_set_halign (vbox_inside_left, GTK_ALIGN_START);
 
-    /* --- (1.)Kontrallkästchen/Checkbox mit Namen "Ignoriere Snapshots" erstellen --- */
-    GtkWidget *snapshots_check = gtk_check_button_new_with_label(_("Snapshots-Pfad durchsuchen"));
-    gtk_widget_add_css_class (snapshots_check, "selection-mode");
+    /* --- (1.)Kontrallkästchen/Checkbox "snapshots" erstellen --- */
+    GtkWidget *snapshots_check = gtk_check_button_new_with_label(_("Suche in Snapshots"));
+    //gtk_widget_add_css_class (snapshots_check, "selection-mode");
     gtk_check_button_set_active (GTK_CHECK_BUTTON(snapshots_check), FALSE);
+    gtk_box_append (GTK_BOX (vbox_inside_left), snapshots_check);
 
-     /* --- (2.)Kontrollkästchen/Checkbox mit Namen "root" erstellen --- */
-    GtkWidget *root_check = gtk_check_button_new_with_label(_("System-Pfad durchsuchen"));
-    gtk_widget_add_css_class (root_check, "selection-mode");
+     /* --- (2.)Kontrollkästchen/Checkbox "root" erstellen --- */
+    GtkWidget *root_check = gtk_check_button_new_with_label(_("Suche in System"));
+    //gtk_widget_add_css_class (root_check, "selection-mode");
     gtk_check_button_set_active (GTK_CHECK_BUTTON(root_check), FALSE);
+    gtk_box_append (GTK_BOX (vbox_inside_left), root_check);
 
-    /* --- Beide Checkboxen in horizontale Box einfügen (hier gilt die Reihenfolge) --- */
-    gtk_box_append(GTK_BOX(checkb_box), GTK_WIDGET(snapshots_check));  
-    gtk_box_append(GTK_BOX(checkb_box), GTK_WIDGET(root_check));
+    /* ----- Rechte innere vertikale Box für Checkboxen ------------------------------------ */
+    GtkWidget *vbox_inside_right = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
+    gtk_widget_set_hexpand (vbox_inside_right, FALSE);
+    gtk_widget_set_halign (vbox_inside_right, GTK_ALIGN_START);
 
-    /* Die Widget-Box"checkb_box" der Eltern-WidgetBox"box" hinzugügen */
-    gtk_box_append(GTK_BOX(mainbox), checkb_box);
+    /* --- (3.)Kontrollkästchen/Checkbox mit Namen "exact match" erstellen --- */
+    GtkWidget *exact_check = gtk_check_button_new_with_label(_("Exakte Übereinstimmung"));
+    //gtk_widget_add_css_class (exact_check, "selection-mode");
+    gtk_check_button_set_active (GTK_CHECK_BUTTON(exact_check), FALSE);
+    gtk_box_append (GTK_BOX (vbox_inside_right), exact_check);
+
+    /* ------ Innere Boxen in die Checkboxen-Haupt-Box einfügen ---------------------------- */
+    gtk_box_append (GTK_BOX (cb_hbox), vbox_inside_left);
+    gtk_box_append (GTK_BOX (cb_hbox), vbox_inside_right);
+    gtk_box_append (GTK_BOX (mainbox), cb_hbox);   // und in die Mainbox einfügen
+
 
         /* Flatpak-App-Version hat kein Zugriff auf Root, Checkboxen deaktivieren */
         if (is_flatpak) 
@@ -721,10 +781,11 @@ static void on_activate (AdwApplication *app, gpointer)
     UiRefs *refs = g_new0(UiRefs, 1); // Speicherort anlegen, erzeuge 1 UiRefs im Heap.
     refs->search_entry    = GTK_EDITABLE(search_entry); // Pointer zum Eingabefeld im Struct.
     refs->root_check      = GTK_CHECK_BUTTON(root_check); // Pointer zur Root-Checkbox.
-    refs->snapshots_check = GTK_CHECK_BUTTON(snapshots_check); // Pointer zur Snapshots-Checkbox.
+    refs->snapshots_check = GTK_CHECK_BUTTON(snapshots_check); // Pointer zur Snapshots-Checkbox
+    refs->exact_check     = GTK_CHECK_BUTTON(exact_check);     // ...und Exact_Checkbox.
 
 
-    /* --- Schaltflächen-WidgetBox hier anlegen: ------------------------------ */
+    /* --- Schaltflächen-WidgetBox hier anlegen: ------------------------------------------- */
     GtkWidget *button_hbox = NULL;
     if (!button_hbox) {
         button_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 48); // Abstand zwischen den Buttons
@@ -735,10 +796,8 @@ static void on_activate (AdwApplication *app, gpointer)
 
     }
 
-    /* --- Schaltfläche-Finden:  ------------------------------------------------- */
+    /* --- Schaltfläche-Finden in Thema Akzent --------------------------------------------- */
     GtkWidget *search_button = gtk_button_new_with_label (_("     Finden     "));
-
-     /* ----- Schaltfläche in Theme-Akzent-Farbe und Pill Class ------------------ */
     gtk_widget_add_css_class (search_button, "suggested-action");
 
     /* --- Schaltfläche Finden verbinden --- */
@@ -748,10 +807,9 @@ static void on_activate (AdwApplication *app, gpointer)
     /* --- Suchleiste verbinden für ENTER Taste --- */
     g_signal_connect(search_entry,  "activate", G_CALLBACK(on_search_button_clicked), refs);
 
-    /* ----- Schaltfläche Beenden erzeugen ----- */
+    /* ----- Schaltfläche Beenden ---------------------------------------------------------- */
     GtkWidget *quit_button = gtk_button_new_with_label(_("   Beenden   "));
 
-    
     /* ---- Schaltfläche Signal verbinden ---- */
            // Methode um Anwendung mit jeglichen Instanzen zu schließen:
 //            g_signal_connect(quit_button, "clicked", G_CALLBACK(on_quitbtn_clicked), app);
@@ -762,34 +820,37 @@ static void on_activate (AdwApplication *app, gpointer)
     // Toggel für beide Checkboxen, sowie um den Fokus für die Suchleiste wieder neu zu setzen!
     g_signal_connect(snapshots_check, "toggled", G_CALLBACK(on_check_button_toggled), refs);
     g_signal_connect(root_check, "toggled", G_CALLBACK(on_check_button_toggled), refs);
+    g_signal_connect(exact_check, "toggled", G_CALLBACK(on_check_button_toggled), refs);
 
     /* ----- Schaltfläche der Box hinzufügen ----- */
     gtk_box_append(GTK_BOX(button_hbox), quit_button);    
     gtk_box_append(GTK_BOX(button_hbox), search_button);
 
 
-    /* --- Checkboxen am Search-Button speichern, damit im Callback diese auch abrufen werden --- */
+    /* --- Checkboxen am Search-Button speichern, um diese im Callback abrufen zu können --- */
     g_object_set_data(G_OBJECT(search_button), "root_check", root_check);
     g_object_set_data(G_OBJECT(search_button), "snapshots_check", snapshots_check);
+    g_object_set_data(G_OBJECT(search_button), "exact_check", exact_check);
 
-    /* ----- Spacer vor kommenden button_hbox ----- */
+    /* ----- Spacer vor kommenden button_hbox ---------------------------------------------- */
     //GtkWidget *spacer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     //gtk_widget_set_size_request(spacer, -1, -1); // Breite unbegrenzt, Höhe in px
     //gtk_box_append(GTK_BOX(mainbox), spacer);
 
-    /* -----  Box zur ToolbarView hinzufügen ------------ */
+    /* -----  Box zur ToolbarView hinzufügen ----------------------------------------------- */
     gtk_box_append(GTK_BOX(mainbox), button_hbox);
     adw_toolbar_view_set_content(toolbar_view, GTK_WIDGET(mainbox));
 
-    /* ----- Fenster desktop‑konform anzeigen ----- */
+    /* ----- Fenster desktop‑konform anzeigen ---------------------------------------------- */
     gtk_window_present(GTK_WINDOW(adw_win));
     gtk_widget_grab_focus(search_entry); //fokus auf Suchleiste
 
 }
 
-/* ---------------------------------------------------------------------------
- * Anwendungshauptteil, main()
- * --------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------*
+ * Anwendungshauptteil, main()                                  *
+ * -------------------------------------------------------------*/
 int main (int argc, char **argv)
 {
 
@@ -802,8 +863,8 @@ int main (int argc, char **argv)
 
     init_environment(); // Environment ermitteln, global in config.c
     init_config();      // Config File laden/erstellen in config.c
-        g_print ("Settings load miniterm value: %s\n", g_cfg.miniterm_enable ? "true" : "false"); // testen !!
-        g_print ("Settings load test value: %s\n", g_cfg.test_enable ? "true" : "false"); // testen !!
+    //   g_print ("Settings load miniterm value: %s\n", g_cfg.miniterm_enable ? "true" : "false"); // testen !!
+    //   g_print ("Settings load test value: %s\n", g_cfg.test_enable ? "true" : "false"); // testen !!
     //save_config ();     // Config File speichern in config.c // hier noch als Test !!
 
     /* ----- Erstelle den Pfad zu den locale-Dateien ----------------------------------- */

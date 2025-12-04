@@ -1,9 +1,10 @@
 # meson.build
-# toq 2025-12-02
+# toq 2025-12-03
 # Project definition (App ID)
-project('free.toq.finden', 'c', meson_version: '>= 0.47', 
+project('free.toq.finden', 'c', meson_version: '>= 0.59', 
   default_options: [
     'warning_level=3',
+    'werror=false',
     'c_std=c11',
     'buildtype=release',
     'prefix=/usr/'
@@ -14,7 +15,8 @@ project('free.toq.finden', 'c', meson_version: '>= 0.47',
 src_dir  = 'src'
 data_dir = 'data'
 icons_dir = join_paths(data_dir, 'icons') # Icons
-po_dir   = join_paths(src_dir, 'po')     # PO files
+po_dir   = join_paths(src_dir, 'po')      # PO files
+source_root = meson.global_source_root()
 
 # GResource XML definition
 gresource_xml = join_paths(src_dir, 'free.toq.finden.gresource.xml')
@@ -22,7 +24,7 @@ gresource_xml = join_paths(src_dir, 'free.toq.finden.gresource.xml')
 # Dependencies
 glib_dep    = dependency('glib-2.0', required : true)
 gtk_dep     = dependency('gtk4', required : true)
-adwaita_dep = dependency('libadwaita-1', required : true)
+adwaita_dep = dependency('libadwaita-1', version: '>= 1.8.alpha', required : true)
 gnome = import('gnome')
 
 # Remove "unused" warnings, without code changes.
@@ -38,12 +40,11 @@ add_project_arguments(
 # Generate ressources file
 gresource_c = custom_target(
   'gresource',
-  output : 'free.toq.finden-gresource.c',   # nur Dateiname
-  command : ['glib-compile-resources',
-             join_paths(meson.source_root(), 'src', 'resources.xml'),
-             '--sourcedir=' + join_paths(meson.source_root(), 'data', 'icons'),
-             '--generate-source',
-             '--target=' + 'free.toq.finden-gresource.c']  # Ziel im Build dir
+  output : 'free.toq.finden-gresource.c',
+  command : ['glib-compile-resources', join_paths(source_root, 'src', 'resources.xml'),
+                      '--sourcedir=' + join_paths(source_root, 'data', 'icons'),
+                      '--generate-source',
+                      '--target=' + 'free.toq.finden-gresource.c']
 )
 
 # Executable
@@ -72,22 +73,27 @@ install_data(join_paths(icons_dir, 'free.toq.miniterm.svg'),
 install_data(join_paths(data_dir, 'free.toq.finden.desktop.download'),
  install_dir: join_paths(get_option('prefix'), 'share', 'applications'),
  rename     : 'free.toq.finden.desktop')
+install_data(join_paths(data_dir, 'free.toq.miniterm.desktop.download'),
+ install_dir: join_paths(get_option('prefix'), 'share', 'applications'),
+ rename     : 'free.toq.miniterm.desktop')
 
 # Localization files
 # EN 
 po_file_en = join_paths(po_dir, 'toq-finden_en_US.po')
 mo_file = 'toq-finden.mo'
-run_command('msgfmt', po_file_en, '--output-file=' + 'toq-finden_en_US.mo', check : true)
-
-install_data('toq-finden_en_US.mo',
- install_dir: join_paths(get_option('prefix'), 'share', 'locale', 'en_US', 'LC_MESSAGES'),
- rename     : mo_file)
-
+run_command('msgfmt', po_file_en, '--output-file=' + join_paths('en_US.mo'), check : true)
+install_data(join_paths( 'en_US.mo'),
+  install_dir: join_paths(get_option('prefix'), 'share', 'locale', 'en_US', 'LC_MESSAGES'),
+  rename: mo_file
+)
 # PL
 po_file_pl = join_paths(po_dir, 'toq-finden_pl_PL.po')
-run_command('msgfmt', po_file_pl, '--output-file=' + 'toq-finden_pl_PL.mo', check : true)
+run_command('msgfmt', po_file_pl, '--output-file=' + join_paths('pl_PL.mo'), check : true)
+install_data(join_paths( 'pl_PL.mo'),
+  install_dir: join_paths(get_option('prefix'), 'share', 'locale', 'pl_PL', 'LC_MESSAGES'),
+  rename: mo_file
+)
 
-install_data('toq-finden_pl_PL.mo',
- install_dir: join_paths(get_option('prefix'), 'share', 'locale', 'pl_PL', 'LC_MESSAGES'),
- rename     : mo_file)
+# Update Cache
+gnome.post_install( gtk_update_icon_cache: true, update_desktop_database: true,)
 
