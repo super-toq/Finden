@@ -211,10 +211,10 @@ static void show_settings (GSimpleAction *action, GVariant *parameter, gpointer 
 
     /* ----- Haupt-BOX der Settings-Seite ----- */
     GtkWidget *settings_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
-    gtk_widget_set_margin_top(settings_box, 24);
-    gtk_widget_set_margin_start(settings_box, 24);
-    gtk_widget_set_margin_end(settings_box, 24);
-    gtk_widget_set_margin_bottom(settings_box, 24);
+    gtk_widget_set_margin_top(settings_box, 12);
+    gtk_widget_set_margin_start(settings_box, 12);
+    gtk_widget_set_margin_end(settings_box, 12);
+    gtk_widget_set_margin_bottom(settings_box, 12);
 
     /* ----- PreferencesGroup erstellen ----- */
     AdwPreferencesGroup *settings_group = ADW_PREFERENCES_GROUP(adw_preferences_group_new());
@@ -263,7 +263,7 @@ static void show_settings (GSimpleAction *action, GVariant *parameter, gpointer 
     /* ----- NavigationPage anlegen ----- */
     AdwNavigationPage *settings_page = 
                       adw_navigation_page_new(GTK_WIDGET(settings_toolbar), _("Einstellungen"));
-    gtk_widget_set_size_request(GTK_WIDGET(settings_page), 630, 305);
+    gtk_widget_set_size_request(GTK_WIDGET(settings_page), 510, 260);
 
     /* ----- Page der Settings_nav hinzufügen ----- */
     adw_navigation_view_push(settings_nav, settings_page);
@@ -625,7 +625,7 @@ static void on_activate (AdwApplication *app, gpointer)
     AdwApplicationWindow *adw_win = ADW_APPLICATION_WINDOW (adw_application_window_new (GTK_APPLICATION (app))); 
 
     gtk_window_set_title (GTK_WINDOW(adw_win), "Finden");         // WM-Titel
-    gtk_window_set_default_size (GTK_WINDOW(adw_win), 630, 305);  // Standard-Fenstergröße
+    gtk_window_set_default_size (GTK_WINDOW(adw_win), 510, 260);  // Standard-Fenstergröße
     gtk_window_set_resizable (GTK_WINDOW (adw_win), FALSE);       // Skalierung nicht erlauben
 
     /* --- Navigation Root ----- */
@@ -673,7 +673,7 @@ static void on_activate (AdwApplication *app, gpointer)
 
     /* ---- Haupt‑Box erstellen ----------------------------------------------------------- */
     GtkBox *mainbox = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 12));
-    gtk_box_set_spacing(GTK_BOX(mainbox), 12);                // Abstand zwischen allen Elementen (vertikal)
+    gtk_box_set_spacing(GTK_BOX(mainbox), 6);                // Abstand zwischen allen Elementen (vertikal)
     gtk_widget_set_margin_top    (GTK_WIDGET (mainbox), 12);
     gtk_widget_set_margin_bottom (GTK_WIDGET (mainbox), 12);
     gtk_widget_set_margin_start  (GTK_WIDGET (mainbox), 12);
@@ -690,7 +690,7 @@ static void on_activate (AdwApplication *app, gpointer)
 
     /* ----- Smiley‑Image aus der Resource ----- */
     GtkWidget *smiley = gtk_image_new_from_resource ("/free/toq/finden/smiley1");
-    gtk_image_set_pixel_size (GTK_IMAGE (smiley), 32);   // Smiley Größe
+    gtk_image_set_pixel_size (GTK_IMAGE (smiley), 24);   // Smiley Größe
 
     /* ----- BOX-Widget für Text und Smiley erstellen ----- */
     GtkBox *smileytext_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6)); // Abstand Icon
@@ -789,7 +789,7 @@ static void on_activate (AdwApplication *app, gpointer)
     GtkWidget *button_hbox = NULL;
     if (!button_hbox) {
         button_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 48); // Abstand zwischen den Buttons
-        gtk_widget_set_margin_top     (GTK_WIDGET (button_hbox), 24); // Abstand zwischen den Boxen
+        gtk_widget_set_margin_top     (GTK_WIDGET (button_hbox), 6); // Abstand zwischen den Boxen
         gtk_widget_set_hexpand(button_hbox, FALSE);                 // nicht ausdehnen!!
         gtk_widget_set_vexpand(button_hbox, FALSE);
         gtk_widget_set_halign(button_hbox, GTK_ALIGN_CENTER);
