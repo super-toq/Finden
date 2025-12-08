@@ -1,12 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <toq@mailbox.org>, 2025-11-04
+# FIRST AUTHOR <toq@mailbox.org>, 2025-11-08
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: 5.1\n"
+"Project-Id-Version: 5.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-12-07 19:15+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -17,91 +17,85 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: main.c:124
+#: src/main.c:124
 msgid "Abbrechen"
 msgstr "Cancel"
 
-#: main.c:205 main.c:265
+#: src/main.c:205 src/main.c:265
 msgid "Einstellungen"
 msgstr "Settings"
 
-#: main.c:221
+#: src/main.c:221
 msgid "Terminaleinstellungen"
 msgstr "Terminal settings"
 
-#: main.c:227
+#: src/main.c:227
 msgid "Miniterm als Terminal verwenden:"
 msgstr "Using Miniterm as terminal"
 
-#: main.c:229
+#: src/main.c:229
 msgid ""
 "Wenn Sie Miniterm nicht benutzen wollen, wird automatisch das systemeigene "
 "Terminal verwendet."
 msgstr ""
 "If you do not want to use Miniterm, the system's built-in terminal will be "
 "used automatically."
-
-#: main.c:236
+#: src/main.c:236
 msgid "Testeinstellungen verwenden:"
-msgstr ""
+msgstr "Inactive Setting"
 
-#: main.c:238
+#: src/main.c:238
 msgid "Dies ist eine Vorbereitung für eine kommende Funktion."
-msgstr ""
+msgstr "Upcoming feature..."
 
-#: main.c:504
+#: src/main.c:504
 msgid "Run0 nicht aktiviert"
 msgstr "Run0 not activated"
 
-#: main.c:505
+#: src/main.c:505
 msgid ""
 "Der Service Run0 ist nicht aktiv,\n"
 "bitte überprüfen Sie Ihre Systemkonfiguration.\n"
 msgstr ""
 "The service Run0 is not active,\n"
 "please check your system configuration.\n"
-
-#: main.c:567
+#: src/main.c:567
 msgid "Kein Terminal gefunden"
 msgstr "No terminal found"
 
-#: main.c:568
+#: src/main.c:568
 msgid ""
 "Es konnte kein unterstütztes Terminal auf diesem System gefunden werden!"
 msgstr "No supported terminal could be found on this system!"
 
-#: main.c:656
+#: src/main.c:656
 msgid "Einstellungen     "
-msgstr "Settings          "
+msgstr "Settings         "
 
-#: main.c:657
+#: src/main.c:657
 msgid "Infos zu Finden       "
 msgstr "About Finden      "
 
-#: main.c:715
-#, fuzzy
+#: src/main.c:715
 msgid "Finden statt Suchen"
 msgstr "Finding instead of Searching"
 
-#: main.c:744
+#: src/main.c:744
 msgid "Suche in Snapshots"
 msgstr "Search in .snapshots path"
 
-#: main.c:750
+#: src/main.c:750
 msgid "Suche in System"
 msgstr "Search in system path"
 
-#: main.c:761
+#: src/main.c:761
 msgid "Exakte Übereinstimmung"
 msgstr "Exact match"
 
-#: main.c:800
+#: src/main.c:800
 msgid "     Finden     "
 msgstr "   Now find   "
 
-#: main.c:811
+#: src/main.c:811
 msgid "   Beenden   "
 msgstr "     Quit     "
-
-#~ msgid "Suchbegriff eingeben …"
-#~ msgstr "Enter search term …"
