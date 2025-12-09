@@ -595,14 +595,14 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
     else
         term_option = "-e";                                 // alle anderen wie KDE-Konsole(<22.12), xterm, Standard-Option: "-e"
 
-    /* 7. ---- Kommando zusammenbauen ---------------------------------------------------- */
+    /* 7. ---- Kommando zusammenbauen ------------------------------------------------------ */
     gchar *full_cmd = g_strdup_printf("%s; exec bash", find_cmd);
 
     /* komplettes Kommando ausgeben */
     g_print ("command: %s %s %s\n", glob_term_name, term_option, full_cmd);  //zum testen !!
 
-    /* 8. ---- Argument-Liste vorbereiten ------------------------------------------------ */
-    /* argv = "/usr/bin/gnome-terminal -- bash -c "/usr/bin/find / -iname \"*example*\"; exec bash"" */
+    /* 8. ---- Argument-Liste vorbereiten, Beispiel --------------------------------------- */
+    /* argv = "/usr/bin/toq-miniterm -- bash -c "/usr/bin/find / -iname \"*example*\"; exec bash"" */
     /* g_strdup   Funktion zum kopieren eines Strings in ein neu angel. Speicherplatz + Zeiger darauf */
     gchar *argv[] = {
         term_path,
@@ -614,7 +614,8 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
     };
     /* 9. ---- Terminal starten ---------------------------------------------------------- */
     GError *error = NULL;
-    gchar *cwd = g_get_current_dir ();   /* Arbeitsverzeichnis */
+
+    gchar *cwd = g_get_current_dir ();   // Arbeitsverzeichnis
     if (!g_spawn_async (cwd, argv, NULL, G_SPAWN_DEFAULT, NULL, NULL, NULL, &error)) {
         g_warning ("Error starting the terminal: %s", error->message);
         g_error_free (error);
