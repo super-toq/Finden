@@ -1,5 +1,4 @@
 /usr/bin/toq-finden
-/usr/bin/toq-miniterm
 /usr/share/locale/en_US/LC_MESSAGES/toq-finden.mo
 /usr/share/locale/pl_PL/LC_MESSAGES/toq-finden.mo
 /usr/share/icons/hicolor/scalable/apps/free.toq.finden.svg

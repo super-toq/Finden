@@ -1,5 +1,5 @@
 # meson.build
-# toq 2025-12-03
+# toq 2025-12-16
 # Project definition (App ID)
 project('free.toq.finden', 'c', meson_version: '>= 0.59', 
   default_options: [
@@ -61,21 +61,21 @@ executable('toq-finden',
 
 
 # Sub - Miniterm Path
-subdir('src/miniterm')
+# subdir('src/miniterm')
 
 # Install Icon (App ID)
 install_data(join_paths(icons_dir, 'free.toq.finden.svg'),
  install_dir : join_paths(get_option('prefix'), 'share', 'icons', 'hicolor', 'scalable', 'apps'))
-install_data(join_paths(icons_dir, 'free.toq.miniterm.svg'),
- install_dir : join_paths(get_option('prefix'), 'share', 'icons', 'hicolor', 'scalable', 'apps'))
+# install_data(join_paths(icons_dir, 'free.toq.miniterm.svg'),
+# install_dir : join_paths(get_option('prefix'), 'share', 'icons', 'hicolor', 'scalable', 'apps'))
 
 # Install .desktop file (App ID)
 install_data(join_paths(data_dir, 'free.toq.finden.desktop.download'),
  install_dir: join_paths(get_option('prefix'), 'share', 'applications'),
  rename     : 'free.toq.finden.desktop')
-install_data(join_paths(data_dir, 'free.toq.miniterm.desktop.download'),
- install_dir: join_paths(get_option('prefix'), 'share', 'applications'),
- rename     : 'free.toq.miniterm.desktop')
+# install_data(join_paths(data_dir, 'free.toq.miniterm.desktop.download'),
+# install_dir: join_paths(get_option('prefix'), 'share', 'applications'),
+# rename     : 'free.toq.miniterm.desktop')
 
 # Localization files
 # EN 

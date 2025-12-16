@@ -8,7 +8,7 @@
  * Please note:
  * The Use of this code and execution of the applications is at your own risk, I accept no liability!
  *
- * Version 0.9.6_2
+ * Version 0.9.7
  */
 #include <glib.h>
 #include <gtk/gtk.h>
@@ -34,7 +34,7 @@ static gchar       *glob_term_path = NULL;  // terminal Pfad global ermittelt
 static const gchar *glob_term_name = NULL;  // term. Name ...
 static gchar       *glob_path_miniterm = NULL;  // miniterm Pfad
 static const gchar *glob_mini     = NULL;   // miniterm local
-static const char  *flatpak_id     = NULL;  // ID...
+static const gchar *flatpak_id     = NULL;  // ID...
 static gboolean    is_flatpak     = FALSE;  // 1 oder 0 ausgeben
 
 
@@ -61,22 +61,23 @@ static void find_terminals(void)
     if (!app_dir) {g_warning ("[t] Abort: variable app_dir was not set!\n"); 
     return; } // gesamte Funktion beenden bei fehlenden app_dir
 
+/* Zum Umbau markiert, Miniterm ersetzen durch Terminal-Auswahl !!! */ 
     /* --- 1.2 Pfad zu miniterm im selben Verzeichnis suchen */
-    gchar *miniterm_path = g_build_filename(app_dir, "toq-miniterm", NULL);
+//    gchar *miniterm_path = g_build_filename(app_dir, "toq-miniterm", NULL);
 
-    /* --- 1.3 Prüfen, ob miniterm existiert und ausführbar ist */
-    if (g_file_test(miniterm_path, G_FILE_TEST_IS_EXECUTABLE)) {
-        glob_path_miniterm = g_strdup(miniterm_path);
-        glob_mini          = "toq-miniterm";
+    /* --- 1.3 Prüfen, ob Terminal-NEU existiert und ausführbar ist */
+//    if (g_file_test(miniterm_path, G_FILE_TEST_IS_EXECUTABLE)) {
+//        glob_path_miniterm = g_strdup(miniterm_path);
+//        glob_mini          = "toq-miniterm";
 
-        g_print("[t1] %s found in %s\n", glob_mini, glob_path_miniterm);
-        g_free(miniterm_path);
+//        g_print("[t1] %s found in %s\n", glob_mini, glob_path_miniterm);
+//        g_free(miniterm_path);
 
-    }  else {
-         glob_path_miniterm = g_find_program_in_path ("toq-miniterm");
-         glob_mini          = "toq-miniterm";
-         g_print("[t1] %s found in %s\n", glob_mini, glob_path_miniterm);
-    }
+//    }  else {
+//         glob_path_miniterm = g_find_program_in_path ("toq-miniterm");
+//         glob_mini          = "toq-miniterm";
+//         g_print("[t1] %s found in %s\n", glob_mini, glob_path_miniterm);
+//    }
     /* ----- 2. System-Terminal ermitteln -------------------------- */
     if (!glob_term_name) {
             static const gchar *terminals[] = {
@@ -106,7 +107,7 @@ static void find_terminals(void)
 }
 
 /* ----- Message / Alert-Dialog Generisch,  show_alert_dialog (parent,*Titel, *Inhalttext) ----- */
-static void on_alert_dialog_response (AdwAlertDialog *dialog, const char *response, gpointer user_data)
+static void on_alert_dialog_response (AdwAlertDialog *dialog, const gchar *response, gpointer user_data)
 {
     if (g_strcmp0 (response, "ok") == 0)
         g_print ("Dialog btn - ok\n");
@@ -115,7 +116,7 @@ static void on_alert_dialog_response (AdwAlertDialog *dialog, const char *respon
 }
 
 /* ----- Callback Alert-Dialog anzeigen (generisch) ------------------------------------- */
-static void show_alert_dialog (GtkWindow *parent, const char *title, const char *body)
+static void show_alert_dialog (GtkWindow *parent, const gchar *title, const gchar *body)
 {
     if (!parent || !GTK_IS_WINDOW (parent)) {
         g_warning ("No valid parent window for alert dialog!\n");
@@ -145,7 +146,7 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
     /* About‑Dialog anlegen */
     AdwAboutDialog *about = ADW_ABOUT_DIALOG (adw_about_dialog_new ());
     adw_about_dialog_set_application_name (about, "Finden");
-    adw_about_dialog_set_version (about, "0.9.6");
+    adw_about_dialog_set_version (about, "0.9.7");
     adw_about_dialog_set_developer_name (about, "toq");
     adw_about_dialog_set_website (about, "https://github.com/super-toq");
 
@@ -171,11 +172,12 @@ static void show_about (GSimpleAction *action, GVariant *parameter, gpointer use
         "CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, "
         "OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE "
         "OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n\n"
-        "Application Icon by SVG. \n"
+        "Application Icon by SVG Repo. \n"
         "https://www.svgrepo.com \n"
-        "Thanks to SVG for sharing their free icons, we appreciate your generosity and respect your work.\n"
-        "LICENSE for the icon: \n"
-        "CC Attribution License \n"
+        "Thanks to SVG Repo for sharing their free icons, "
+        "we appreciate your generosity and respect your work.\n"
+        "The icons are licensed under the \n"
+        "Creative Commons Attribution License.\n"
         "Follow the link to view details of the CC Attribution License: \n"
         "https://www.svgrepo.com/page/licensing/#CC%20Attribution \n");
 
@@ -282,9 +284,10 @@ static void show_settings (GSimpleAction *action, GVariant *parameter, gpointer 
 gchar *find_cmd = NULL;
 const gchar *iname_option = FALSE;
 gchar *iname_query = NULL;
+gchar *grep = NULL;
 
     /* 5.1  find Kommando:   ([A] ohne Root, nur im Homeverzeichnis)  */
-static void action_A(const char *find_path, const char *query, UiRefs *refs)  
+static void action_A(const gchar *find_path, const gchar *query, UiRefs *refs)  
 { // find_path u. query als Argumente bekommen.
 
     gboolean exact_active = FALSE;
@@ -292,20 +295,22 @@ static void action_A(const char *find_path, const char *query, UiRefs *refs)
     if (GTK_IS_CHECK_BUTTON(refs->exact_check)) exact_active = gtk_check_button_get_active(refs->exact_check);
     if (exact_active) {
        iname_option = "-name";
-       iname_query = g_strdup_printf ("%s \"%s\"", iname_option, query);
+       iname_query  = g_strdup_printf ("%s \"%s\"", iname_option, query);
+              grep  = g_strdup_printf (" | grep -i --color=always \"%s\"", query);
     } else {
        iname_option = "-iname";
-       iname_query = g_strdup_printf ("%s \"*%s*\"", iname_option, query);
+       iname_query  = g_strdup_printf ("%s \"*%s*\"", iname_option, query);
+              grep  = g_strdup_printf ("| grep -i --color=always \"%s\"", query);
     }
-    find_cmd = g_strdup_printf("%s %s %s", 
-       find_path, g_get_home_dir(), iname_query); 
+    find_cmd = g_strdup_printf("%s %s %s %s", 
+       find_path, g_get_home_dir(), iname_query, grep); 
                  /* g_get_home_dir() ist Funktion aus GLib, 
                     welche innerhalb dieser Funktion eine Zeichenkette in "const gchar" ermittelt. */
     g_free (iname_query);
 } // Hinweis: g_free(find_cmd) erfolgt in Suchfunktion;
 
     /* 5.2  find Kommando:   ([B] Root ohne Snapshots)  */
-static void action_B(const char *find_path, const char *query, UiRefs *refs) 
+static void action_B(const gchar *find_path, const gchar *query, UiRefs *refs) 
 { // find_path u. query als Argumente bekommen.
 
     gboolean exact_active = FALSE;
@@ -313,21 +318,23 @@ static void action_B(const char *find_path, const char *query, UiRefs *refs)
     if (GTK_IS_CHECK_BUTTON(refs->exact_check)) exact_active = gtk_check_button_get_active(refs->exact_check);
     if (exact_active) {
        iname_option = "-name";
-       iname_query = g_strdup_printf ("%s \"%s\"", iname_option, query);
+       iname_query  = g_strdup_printf ("%s \"%s\"", iname_option, query);
+              grep  = g_strdup_printf (" | grep -i --color=always \"%s\"", query);
     } else {
        iname_option = "-iname";
-       iname_query = g_strdup_printf ("%s \"*%s*\"", iname_option, query);
+       iname_query  = g_strdup_printf ("%s \"*%s*\"", iname_option, query);
+              grep  = g_strdup_printf ("| grep -i --color=always \"%s\"", query);
     }
 
     find_cmd = g_strdup_printf(
-    "run0 --background=0 --unit=finden --via-shell %s / -path \"/.snapshots\" -prune -o %s",
-        find_path, iname_query);
+    "run0 --background=0 --unit=finden --via-shell %s / -path \"/.snapshots\" -prune -o %s %s",
+        find_path, iname_query, grep);
 
     g_free (iname_query);
 } // Hinweis: g_free(find_cmd) erfolgt in Suchfunktion;
         
     /* 5.3  find Kommando:   ([C] Root + Snapshots)  */
-static void action_C(const char *find_path, const char *query, UiRefs *refs) 
+static void action_C(const gchar *find_path, const gchar *query, UiRefs *refs) 
 { // find_path u. query als Argumente bekommen.
 
     gboolean exact_active = FALSE;
@@ -335,16 +342,19 @@ static void action_C(const char *find_path, const char *query, UiRefs *refs)
     if (GTK_IS_CHECK_BUTTON(refs->exact_check)) exact_active = gtk_check_button_get_active(refs->exact_check);
     if (exact_active) {
        iname_option = "-name";
-       iname_query = g_strdup_printf ("%s \"%s\"", iname_option, query);
+       iname_query  = g_strdup_printf ("%s \"%s\"", iname_option, query);
+              grep  = g_strdup_printf (" | grep -i --color=always \"%s\"", query);
     } else {
        iname_option = "-iname";
-       iname_query = g_strdup_printf ("%s \"*%s*\"", iname_option, query);
+       iname_query  = g_strdup_printf ("%s \"*%s*\"", iname_option, query);
+              grep  = g_strdup_printf ("| grep -i --color=always \"%s\"", query);
     }
 
     find_cmd = g_strdup_printf(
-    "run0 --background=0 --unit=finden --via-shell %s / %s", find_path, iname_query); 
+    "run0 --background=0 --unit=finden --via-shell %s / %s %s", find_path, iname_query, grep); 
 
-    g_free (iname_query);
+    g_free(iname_query);
+    g_free(grep);
 } // Hinweis: g_free(find_cmd) erfolgt in Suchfunktion;
 
 
@@ -468,7 +478,7 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
     }
 
     /* ---- 4. Schalter aus 3.x - für ROOT, RUN0, SNAPSHOTS + Find-Kommande ------------------ */
-    void (*cmd_action)(const char *, const char *, UiRefs *) = NULL;
+    void (*cmd_action)(const gchar *, const gchar *, UiRefs *) = NULL;
     cmd_action = action_A; // Find-Kommando [A] wird in "static void action_A" definiert
     // Diese Maßnahme war notwendig, da sonst nested-Fuction innerhalb einer Funktion entsteht!
 
@@ -548,16 +558,17 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
     /* 6. ---- Terminal im System auswählen ---------------------------------------------- */
     gchar *term_path = NULL;
 
+/* Miniterm deaktiviert, Umbau auf Wahl-Terminal  !!! */
    /* T1. miniterm = true  */
-   if (g_cfg.miniterm_enable) {
-        printf("[t] In settings, miniterm is enabled!\n");
+//   if (g_cfg.miniterm_enable) {
+//        printf("[t] In settings, miniterm is enabled!\n");
         /* t1.1 miniterm-Pfad global hinterlegt? */
-        if (glob_mini && g_str_has_prefix(glob_mini, "toq-miniterm")) {
+//        if (glob_mini && g_str_has_prefix(glob_mini, "toq-miniterm")) {
             /* t1.2 miniterm-Pfad als Terminal-Pfad übergeben */
-            term_path = glob_path_miniterm;
-        }
+//            term_path = glob_path_miniterm;
+//        }
    //g_print("[t] Known path to miniterm = %s\n", term_path); // testen
-   } else {
+//   } else {
 
       /* T2. miniterm = false  */
       term_path = glob_term_path;
@@ -574,13 +585,13 @@ static void on_search_button_clicked (GtkButton *button, gpointer user_data)
             g_free (find_cmd);
             return;
       }
-   }
+//   } //Ende von Else
 
     /* 7. Erweiterte Terminal-Option bestimmen -------------------------------------------- */
     const gchar *term_option;                                       // Terminals mit Option "--"
     if (g_str_has_suffix(glob_term_name, "gnome-terminal") ||
-         g_str_has_suffix(glob_term_name, "miniterm") ||
-          g_str_has_suffix(glob_term_name, "toq-miniterm") ||
+         // g_str_has_suffix(glob_term_name, "miniterm") ||
+         // g_str_has_suffix(glob_term_name, "toq-miniterm") ||
            g_str_has_suffix(glob_term_name, "kgx") ||
             g_str_has_suffix(glob_term_name, "terminator") ||
              g_str_has_suffix(glob_term_name, "tilix") ||
@@ -674,7 +685,7 @@ static void on_activate (AdwApplication *app, gpointer)
 
     /* --- Popover‑Menu im Hamburger --- */
     GMenu *menu = g_menu_new ();
-    g_menu_append (menu, _("Einstellungen     "), "app.show-settings");
+//    g_menu_append (menu, _("Einstellungen     "), "app.show-settings");
     g_menu_append (menu, _("Infos zu Finden       "), "app.show-about");
     GtkPopoverMenu *popover = GTK_POPOVER_MENU (
     gtk_popover_menu_new_from_model (G_MENU_MODEL (menu)));
@@ -867,10 +878,10 @@ static void on_activate (AdwApplication *app, gpointer)
 /* -------------------------------------------------------------*
  * Anwendungshauptteil, main()                                  *
  * -------------------------------------------------------------*/
-int main (int argc, char **argv)
+int main (int argc, gchar **argv)
 {
 
-    const char *locale_path = NULL;
+    const gchar *locale_path = NULL;
 
     /* Resource‑Bundle (finden.gresource) registrieren um den Inhalt verfügbar zu machen */
     g_resources_register (resources_get_resource ()); // reicht für Icon innerhalb der App
@@ -897,7 +908,7 @@ int main (int argc, char **argv)
     bindtextdomain("toq-finden", locale_path);
     g_print ("Lokalization path: %s \n", locale_path); // testen
 
-    /* Prüfen ob miniterm im lokalem Pfad */
+    /* Prüfung auf vorhandene Terminals */
     find_terminals();
 
     /* GTK/Adwaita Anwendung: */
