@@ -11,7 +11,7 @@ A small Gnome desktop application to find items on your computer that you are lo
 
 #### Ubuntu/Debian:  
 ```
-sudo apt-get install libglib2.0-dev libgtk-4-dev libadwaita-1-dev ninja-build meson 
+sudo apt update && apt install libglib2.0-dev libgtk-4-dev libadwaita-1-dev ninja-build meson 
 ```  
 
 #### Fedora:  
@@ -49,6 +49,6 @@ Go to the download folder from git clone and run the script:
 ```
   
   
-**Please note**:  
-***This code is part of my learning project. Use of the code and execution of the application is at your own risk; I accept no liability!***
+> [!Note]  
+> ***This code is part of my learning project. Use of the code and execution of the application is at your own risk; I accept no liability!***
   
