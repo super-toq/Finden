@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: 5.2\n"
+"Project-Id-Version: 5.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-07 19:15+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"POT-Creation-Date: 2025-12-22 12:06+0100\n"
+"PO-Revision-Date: 2025-12-02 16:47+MET\n"
 "Last-Translator: super-toq <toq@mailbox.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: german/polish\n"
@@ -17,85 +17,94 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/main.c:124
+#: main.c:141
 msgid "Abbrechen"
 msgstr "Anuluj"
 
-#: src/main.c:205 src/main.c:265
+#: main.c:235 main.c:293
 msgid "Einstellungen"
 msgstr "Ustawienia"
 
-#: src/main.c:221
+#: main.c:251
 msgid "Terminaleinstellungen"
 msgstr "Ustawienia terminala"
 
-#: src/main.c:227
-msgid "Miniterm als Terminal verwenden:"
+#: main.c:257
+msgid "Terminal mit tmux anzeigen (experimental)"
+msgstr "Wyświetl terminal za pomocą tmux"
+
+#: main.c:259
+msgid "Verwende tmux zur Anzeige der Terminal-Ausgabe."
+msgstr "Użyj tmux do wyświetlania wyjścia terminala."
+
+#: main.c:267
+#, fuzzy
+msgid "Miniterm als Terminal verwenden"
 msgstr "Użyj Miniterm jako terminala"
 
-#: src/main.c:229
+#: main.c:269
 msgid ""
 "Wenn Sie Miniterm nicht benutzen wollen, wird automatisch das systemeigene "
 "Terminal verwendet."
 msgstr ""
-"Jeśli nie chcesz używać Miniterm, automatycznie używane jest "
-"Terminal systemowy."
-#: src/main.c:236
-msgid "Testeinstellungen verwenden:"
-msgstr "Inactive Setting"
+"Jeśli nie chcesz używać Miniterm, automatycznie używane jest Terminal "
+"systemowy."
 
-#: src/main.c:238
-msgid "Dies ist eine Vorbereitung für eine kommende Funktion."
-msgstr "Upcoming feature..."
-
-#: src/main.c:504
+#: main.c:800
 msgid "Run0 nicht aktiviert"
 msgstr "Run0 nieaktywny"
 
-#: src/main.c:505
+#: main.c:801
 msgid ""
 "Der Service Run0 ist nicht aktiv,\n"
 "bitte überprüfen Sie Ihre Systemkonfiguration.\n"
 msgstr ""
 "Usługa Run0 nie jest aktywna,\n"
 "sprawdź konfigurację systemu.\n"
-#: src/main.c:567
+
+#: main.c:862
 msgid "Kein Terminal gefunden"
 msgstr "Nie znaleziono terminala"
 
-#: src/main.c:568
+#: main.c:863
 msgid ""
 "Es konnte kein unterstütztes Terminal auf diesem System gefunden werden!"
 msgstr "Nie znaleziono żadnego obsługiwanego terminala w tym systemie!"
 
-#: src/main.c:656
+#: main.c:984
 msgid "Einstellungen     "
 msgstr "Ustawienia       "
 
-#: src/main.c:657
+#: main.c:985
 msgid "Infos zu Finden       "
 msgstr "O Finden         "
 
-#: src/main.c:715
+#: main.c:1021
 msgid "Finden statt Suchen"
 msgstr "Znajdowanie zamiast Szukania"
 
-#: src/main.c:744
+#: main.c:1050
 msgid "Suche in Snapshots"
 msgstr "Szukaj w katalogu .snapshot"
 
-#: src/main.c:750
+#: main.c:1056
 msgid "Suche in System"
 msgstr "Szukaj w katalogu System"
 
-#: src/main.c:761
+#: main.c:1067
 msgid "Exakte Übereinstimmung"
 msgstr "dokładne dopasowanie"
 
-#: src/main.c:800
+#: main.c:1106
 msgid "     Finden     "
 msgstr "  Znajdować  "
 
-#: src/main.c:811
+#: main.c:1117
 msgid "   Beenden   "
 msgstr "   Zakończ   "
+
+#~ msgid "Testeinstellungen verwenden:"
+#~ msgstr "Inactive Setting"
+
+#~ msgid "Dies ist eine Vorbereitung für eine kommende Funktion."
+#~ msgstr "Upcoming feature..."
