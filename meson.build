@@ -1,5 +1,5 @@
 # meson.build
-# toq 2025-12-16
+# toq 2025-12-22
 # Project definition (App ID)
 project('free.toq.finden', 'c', meson_version: '>= 0.59', 
   default_options: [
@@ -27,13 +27,9 @@ gtk_dep     = dependency('gtk4', required : true)
 adwaita_dep = dependency('libadwaita-1', version: '>= 1.8.alpha', required : true)
 gnome = import('gnome')
 
-# Remove "unused" warnings, without code changes.
+# Remove "unused" warnings
 add_project_arguments(
- '-Wno-unused-variable',
- '-Wno-unused-parameter',
- '-Wno-missing-parameter-name',
- '-Wno-missing-field-initializers',
- '-Wno-overlength-strings',
+ '-w',
  language : 'c'
 )
 
