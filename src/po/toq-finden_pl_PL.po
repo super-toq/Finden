@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 5.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-22 12:06+0100\n"
+"POT-Creation-Date: 2025-12-22 22:17+0100\n"
 "PO-Revision-Date: 2025-12-02 16:47+MET\n"
 "Last-Translator: super-toq <toq@mailbox.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,32 +17,32 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: main.c:141
+#: main.c:130
 msgid "Abbrechen"
 msgstr "Anuluj"
 
-#: main.c:235 main.c:293
+#: main.c:224 main.c:282
 msgid "Einstellungen"
 msgstr "Ustawienia"
 
-#: main.c:251
+#: main.c:240
 msgid "Terminaleinstellungen"
 msgstr "Ustawienia terminala"
 
-#: main.c:257
+#: main.c:246
 msgid "Terminal mit tmux anzeigen (experimental)"
 msgstr "Wyświetl terminal za pomocą tmux"
 
-#: main.c:259
+#: main.c:248
 msgid "Verwende tmux zur Anzeige der Terminal-Ausgabe."
 msgstr "Użyj tmux do wyświetlania wyjścia terminala."
 
-#: main.c:267
+#: main.c:256
 #, fuzzy
 msgid "Miniterm als Terminal verwenden"
 msgstr "Użyj Miniterm jako terminala"
 
-#: main.c:269
+#: main.c:258
 msgid ""
 "Wenn Sie Miniterm nicht benutzen wollen, wird automatisch das systemeigene "
 "Terminal verwendet."
@@ -50,11 +50,11 @@ msgstr ""
 "Jeśli nie chcesz używać Miniterm, automatycznie używane jest Terminal "
 "systemowy."
 
-#: main.c:800
+#: main.c:840
 msgid "Run0 nicht aktiviert"
 msgstr "Run0 nieaktywny"
 
-#: main.c:801
+#: main.c:841
 msgid ""
 "Der Service Run0 ist nicht aktiv,\n"
 "bitte überprüfen Sie Ihre Systemkonfiguration.\n"
@@ -62,46 +62,53 @@ msgstr ""
 "Usługa Run0 nie jest aktywna,\n"
 "sprawdź konfigurację systemu.\n"
 
-#: main.c:862
+#: main.c:891
 msgid "Kein Terminal gefunden"
 msgstr "Nie znaleziono terminala"
 
-#: main.c:863
+#: main.c:892
 msgid ""
 "Es konnte kein unterstütztes Terminal auf diesem System gefunden werden!"
 msgstr "Nie znaleziono żadnego obsługiwanego terminala w tym systemie!"
 
-#: main.c:984
+#: main.c:1025
 msgid "Einstellungen     "
 msgstr "Ustawienia       "
 
-#: main.c:985
+#: main.c:1026
 msgid "Infos zu Finden       "
 msgstr "O Finden         "
 
-#: main.c:1021
+#: main.c:1062
 msgid "Finden statt Suchen"
 msgstr "Znajdowanie zamiast Szukania"
 
-#: main.c:1050
-msgid "Suche in Snapshots"
-msgstr "Szukaj w katalogu .snapshot"
+#: main.c:1091
+msgid "Snapshots ignorieren"
+msgstr "Ignoruj snapshots"
 
-#: main.c:1056
-msgid "Suche in System"
-msgstr "Szukaj w katalogu System"
+#: main.c:1098
+msgid "Flatpak ignorieren"
+msgstr "Ignoruj flatpak"
 
-#: main.c:1067
+#: main.c:1110
 msgid "Exakte Übereinstimmung"
 msgstr "dokładne dopasowanie"
 
-#: main.c:1106
+#: main.c:1116
+msgid "Suche im System-Pfad"
+msgstr "Szukaj w katalogu System"
+
+#: main.c:1156
 msgid "     Finden     "
 msgstr "  Znajdować  "
 
-#: main.c:1117
+#: main.c:1167
 msgid "   Beenden   "
 msgstr "   Zakończ   "
+
+#~ msgid "Suche in Snapshots"
+#~ msgstr "Szukaj w katalogu .snapshot"
 
 #~ msgid "Testeinstellungen verwenden:"
 #~ msgstr "Inactive Setting"

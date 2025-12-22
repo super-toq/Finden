@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 5.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-22 12:06+0100\n"
+"POT-Creation-Date: 2025-12-22 22:17+0100\n"
 "PO-Revision-Date: 2025-12-02 16:32+MET\n"
 "Last-Translator: super-toq <toq@mailbox.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,32 +17,32 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: main.c:141
+#: main.c:130
 msgid "Abbrechen"
 msgstr "Cancel"
 
-#: main.c:235 main.c:293
+#: main.c:224 main.c:282
 msgid "Einstellungen"
 msgstr "Settings"
 
-#: main.c:251
+#: main.c:240
 msgid "Terminaleinstellungen"
 msgstr "Terminal settings"
 
-#: main.c:257
+#: main.c:246
 msgid "Terminal mit tmux anzeigen (experimental)"
 msgstr "Display terminal with tmux (experimental)"
 
-#: main.c:259
-msgid "Verwende tmux zur Anzeige der Terminal-Ausgabe."
-msgstr "Use tmux to display the terminal output."
+#: main.c:248
+msgid "Verwende tmux zur Anzeige der Terminal-Ausgabe"
+msgstr "Use tmux to display the terminal output"
 
-#: main.c:267
+#: main.c:256
 #, fuzzy
 msgid "Miniterm als Terminal verwenden"
 msgstr "Using Miniterm as terminal"
 
-#: main.c:269
+#: main.c:258
 msgid ""
 "Wenn Sie Miniterm nicht benutzen wollen, wird automatisch das systemeigene "
 "Terminal verwendet."
@@ -50,11 +50,11 @@ msgstr ""
 "If you do not want to use Miniterm, the system's built-in terminal will be "
 "used automatically."
 
-#: main.c:800
+#: main.c:840
 msgid "Run0 nicht aktiviert"
 msgstr "Run0 not activated"
 
-#: main.c:801
+#: main.c:841
 msgid ""
 "Der Service Run0 ist nicht aktiv,\n"
 "bitte überprüfen Sie Ihre Systemkonfiguration.\n"
@@ -62,46 +62,53 @@ msgstr ""
 "The service Run0 is not active,\n"
 "please check your system configuration.\n"
 
-#: main.c:862
+#: main.c:891
 msgid "Kein Terminal gefunden"
 msgstr "No terminal found"
 
-#: main.c:863
+#: main.c:892
 msgid ""
 "Es konnte kein unterstütztes Terminal auf diesem System gefunden werden!"
 msgstr "No supported terminal could be found on this system!"
 
-#: main.c:984
+#: main.c:1025
 msgid "Einstellungen     "
 msgstr "Settings         "
 
-#: main.c:985
+#: main.c:1026
 msgid "Infos zu Finden       "
 msgstr "About Finden      "
 
-#: main.c:1021
+#: main.c:1062
 msgid "Finden statt Suchen"
 msgstr "Finding instead of Searching"
 
-#: main.c:1050
-msgid "Suche in Snapshots"
-msgstr "Search in .snapshots path"
+#: main.c:1091
+msgid "Snapshots ignorieren"
+msgstr "Ignore snapshots"
 
-#: main.c:1056
-msgid "Suche in System"
-msgstr "Search in system path"
+#: main.c:1098
+msgid "Flatpak ignorieren"
+msgstr "Ignore flatpak"
 
-#: main.c:1067
+#: main.c:1110
 msgid "Exakte Übereinstimmung"
 msgstr "Exact match"
 
-#: main.c:1106
+#: main.c:1116
+msgid "Suche im System-Pfad"
+msgstr "Search in system path"
+
+#: main.c:1156
 msgid "     Finden     "
 msgstr "   Now find   "
 
-#: main.c:1117
+#: main.c:1167
 msgid "   Beenden   "
 msgstr "     Quit     "
+
+#~ msgid "Suche in Snapshots"
+#~ msgstr "Search in .snapshots path"
 
 #~ msgid "Testeinstellungen verwenden:"
 #~ msgstr "Inactive Setting"
