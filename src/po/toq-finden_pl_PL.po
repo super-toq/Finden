@@ -1,15 +1,15 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <toq@mailbox.org>, 2025-11-08
+# FIRST AUTHOR <toq@mailbox.org>, 2025-12-25
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: 5.3\n"
+"Project-Id-Version: 6\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-22 22:17+0100\n"
-"PO-Revision-Date: 2025-12-02 16:47+MET\n"
+"POT-Creation-Date: 2025-12-25 14:42+0100\n"
+"PO-Revision-Date: 2025-12-25 14:55+0100\n"
 "Last-Translator: super-toq <toq@mailbox.org>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: german/polish\n"
@@ -17,32 +17,31 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: main.c:130
+#: main.c:132
 msgid "Abbrechen"
 msgstr "Anuluj"
 
-#: main.c:224 main.c:282
+#: main.c:233 main.c:291
 msgid "Einstellungen"
 msgstr "Ustawienia"
 
-#: main.c:240
+#: main.c:249
 msgid "Terminaleinstellungen"
 msgstr "Ustawienia terminala"
 
-#: main.c:246
+#: main.c:255
 msgid "Terminal mit tmux anzeigen (experimental)"
 msgstr "Wyświetl terminal za pomocą tmux"
 
-#: main.c:248
-msgid "Verwende tmux zur Anzeige der Terminal-Ausgabe."
-msgstr "Użyj tmux do wyświetlania wyjścia terminala."
+#: main.c:257
+msgid "Verwende tmux zur Anzeige der Terminal-Ausgabe"
+msgstr "Użyj tmux do wyświetlania wyjścia terminala"
 
-#: main.c:256
-#, fuzzy
+#: main.c:265
 msgid "Miniterm als Terminal verwenden"
 msgstr "Użyj Miniterm jako terminala"
 
-#: main.c:258
+#: main.c:267
 msgid ""
 "Wenn Sie Miniterm nicht benutzen wollen, wird automatisch das systemeigene "
 "Terminal verwendet."
@@ -50,11 +49,11 @@ msgstr ""
 "Jeśli nie chcesz używać Miniterm, automatycznie używane jest Terminal "
 "systemowy."
 
-#: main.c:840
+#: main.c:849
 msgid "Run0 nicht aktiviert"
 msgstr "Run0 nieaktywny"
 
-#: main.c:841
+#: main.c:850
 msgid ""
 "Der Service Run0 ist nicht aktiv,\n"
 "bitte überprüfen Sie Ihre Systemkonfiguration.\n"
@@ -62,56 +61,86 @@ msgstr ""
 "Usługa Run0 nie jest aktywna,\n"
 "sprawdź konfigurację systemu.\n"
 
-#: main.c:891
+#: main.c:900
 msgid "Kein Terminal gefunden"
 msgstr "Nie znaleziono terminala"
 
-#: main.c:892
+#: main.c:901
 msgid ""
 "Es konnte kein unterstütztes Terminal auf diesem System gefunden werden!"
 msgstr "Nie znaleziono żadnego obsługiwanego terminala w tym systemie!"
 
-#: main.c:1025
+#: main.c:1034
 msgid "Einstellungen     "
 msgstr "Ustawienia       "
 
-#: main.c:1026
-msgid "Infos zu Finden       "
+#: main.c:1035
+msgid "Infos zu Finden   "
 msgstr "O Finden         "
 
-#: main.c:1062
+#: main.c:1071
 msgid "Finden statt Suchen"
 msgstr "Znajdowanie zamiast Szukania"
 
-#: main.c:1091
+#: main.c:1100
 msgid "Snapshots ignorieren"
-msgstr "Ignoruj snapshots"
+msgstr "Ignoruj Snapshots"
 
-#: main.c:1098
+#: main.c:1107
 msgid "Flatpak ignorieren"
-msgstr "Ignoruj flatpak"
+msgstr "Ignoruj Flatpak"
 
-#: main.c:1110
+#: main.c:1119
 msgid "Exakte Übereinstimmung"
-msgstr "dokładne dopasowanie"
+msgstr "Dokładne dopasowanie"
 
-#: main.c:1116
+#: main.c:1125
 msgid "Suche im System-Pfad"
 msgstr "Szukaj w katalogu System"
 
-#: main.c:1156
+#: main.c:1152
+msgid "Suchoptionen"
+msgstr "Search Options"
+
+#: main.c:1158
+msgid ""
+"Erweiterte Anpassung der Suche\n"
+"\n"
+"• <b>Exakte Übereinstimmung:</b>\n"
+"Sucht nach der genauen Schreibweise des Suchbegriffs.\n"
+"• <b>Suche im System-Pfad:</b>\n"
+"Durchsucht das System ab dem Wurzelverzeichnis \"/\".\n"
+"• <b>Snapshots ignorieren:</b>\n"
+"Schließt das Verzeichnis \"/.snapshots\" von der Suche aus.\n"
+"• <b>Flatpak ignorieren:</b>\n"
+"Schließt alle Flatpak-Verzeichnisse von der Suche aus.\n"
+"<b>Hinweis</b>, folgenden Verzeichnisse werden immer ausgeschlossen:\n"
+"\"/proc\", \"/run\",\n"
+"\"~/.local/share/containers\" und\n"
+"\"~/.local/share/Trash\".\n"
+"\n"
+msgstr ""
+"Zaawansowane dostosowanie wyszukiwania\n"
+"\n"
+"Opcje wyszukiwania do zaawansowanego dostosowania wyszukiwania:\n"
+"• <b>Dokładne dopasowanie:</b>\n"
+"Wyszukuje dokładnej pisowni wyszukiwanego terminu.\n"
+"• <b>Szukaj w katalogu System:</b>\n"
+"Przeszukuje system od katalogu głównego \"/\".\n"
+"• <b>Ignoruj Snapshots:</b>\n"
+"Wyklucza katalog \"/.snapshots\" z wyszukiwania.\n"
+"• <b>Ignoruj Flatpak:</b>\n"
+"Wyklucza wszystkie katalogi Flatpak z wyszukiwania.\n"
+"<b>Uwaga</b>, następujące katalogi są zawsze wykluczane:\n"
+"\"/proc\", \"/run\",\n"
+"\"~/.local/share/containers\" i\n"
+"\"~/.local/share/Trash\".\n"
+"\n"
+
+#: main.c:1223
 msgid "     Finden     "
-msgstr "  Znajdować  "
+msgstr "   Znajdować   "
 
-#: main.c:1167
+#: main.c:1234
 msgid "   Beenden   "
-msgstr "   Zakończ   "
-
-#~ msgid "Suche in Snapshots"
-#~ msgstr "Szukaj w katalogu .snapshot"
-
-#~ msgid "Testeinstellungen verwenden:"
-#~ msgstr "Inactive Setting"
-
-#~ msgid "Dies ist eine Vorbereitung für eine kommende Funktion."
-#~ msgstr "Upcoming feature..."
+msgstr "     Zakończ     "

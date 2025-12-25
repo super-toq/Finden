@@ -10,7 +10,7 @@
  *
  *
  */
-#define APP_VERSION    "0.9.9"//_2
+#define APP_VERSION    "1.0"//_
 #define APP_ID         "free.toq.finden"
 #define APP_NAME       "Finden"
 #define APP_DOMAINNAME "toq-finden"
@@ -26,6 +26,7 @@
 
 #include "icon-gresource.h"
 #include "config.h"
+//#include "tmux.h"
 
 /* --- globale Referenzen --- */
 
@@ -189,7 +190,14 @@ static void show_about(GSimpleAction *action, GVariant *parameter, gpointer user
     GtkWindow *parent = GTK_WINDOW(gtk_widget_get_root(GTK_WIDGET(
     gtk_application_get_active_window(GTK_APPLICATION(app)) )));
     adw_dialog_present(ADW_DIALOG(about), GTK_WIDGET(parent));
-}//Ende About-Dialog
+}
+
+/* ----- Hife Popover ------------------------------------------------------------------- */
+static void on_help_button_clicked(GtkButton *button, gpointer user_data)
+{
+
+}   // Ende Help-Button
+
 
 
 /* ----- In Einstellungen: Schalter1-Toggle --------------------------------------------- */
@@ -568,11 +576,11 @@ static void action_A(const gchar *find_path, const gchar *query, UiRefs *refs, F
     if (exact_active) {
         iname_option = "-name";
         contexts->iname_query = g_strdup_printf("%s %s", iname_option, escaped_query);
-        contexts->grep       = g_strdup_printf(" | grep -i --color=always %s", escaped_query);
+        contexts->grep       = g_strdup_printf(" | grep -i --color=always -- %s", escaped_query);
     } else {
         iname_option = "-iname";
         contexts->iname_query = g_strdup_printf("%s '*%s*'", iname_option, query); // hier gewollt kein escaped_query
-        contexts->grep       = g_strdup_printf(" | grep -i --color=always %s", escaped_query);
+        contexts->grep       = g_strdup_printf(" | grep -i --color=always -- %s", escaped_query);
     }
     
     contexts->find_cmd = g_strdup_printf("%s %s %s %s %s %s -print %s", 
@@ -608,11 +616,11 @@ static void action_B(const gchar *find_path, const gchar *query, UiRefs *refs, F
         if (exact_active) {
         iname_option = "-name";
         contexts->iname_query = g_strdup_printf("%s %s", iname_option, escaped_query);
-        contexts->grep       = g_strdup_printf(" | grep -i --color=always %s", escaped_query);
+        contexts->grep       = g_strdup_printf(" | grep -i --color=always -- %s", escaped_query);
     } else {
         iname_option = "-iname";
         contexts->iname_query = g_strdup_printf("%s '*%s*'", iname_option, query); // hier gewollt kein escaped_query
-        contexts->grep       = g_strdup_printf(" | grep -i --color=always %s", escaped_query);
+        contexts->grep       = g_strdup_printf(" | grep -i --color=always -- %s", escaped_query);
     }
 
     contexts->find_cmd = g_strdup_printf(
@@ -648,11 +656,11 @@ static void action_C(const gchar *find_path, const gchar *query, UiRefs *refs, F
     if (exact_active) {
         iname_option = "-name";
         contexts->iname_query = g_strdup_printf("%s %s", iname_option, escaped_query);
-        contexts->grep       = g_strdup_printf(" | grep -i --color=always %s", escaped_query);
+        contexts->grep       = g_strdup_printf(" | grep -i --color=always -- %s", escaped_query);
     } else {
         iname_option = "-iname";
         contexts->iname_query = g_strdup_printf("%s '*%s*'", iname_option, query); // hier gewollt kein escaped_query
-        contexts->grep       = g_strdup_printf(" | grep -i --color=always %s", escaped_query);
+        contexts->grep       = g_strdup_printf(" | grep -i --color=always -- %s", escaped_query);
     }
 
     contexts->find_cmd = g_strdup_printf(
@@ -995,7 +1003,7 @@ static void on_activate(AdwApplication *app, gpointer)
     AdwApplicationWindow *adw_win = ADW_APPLICATION_WINDOW(adw_application_window_new(GTK_APPLICATION(app))); 
 
     gtk_window_set_title(GTK_WINDOW(adw_win), APP_NAME);            // WM-Titel
-    gtk_window_set_default_size(GTK_WINDOW(adw_win), 510, 250);     // Standard-Fenstergröße
+    gtk_window_set_default_size(GTK_WINDOW(adw_win), 560, 250);     // Standard-Fenstergröße
     gtk_window_set_resizable(GTK_WINDOW(adw_win), FALSE);           // Skalierung nicht erlauben
 
     /* --- Navigation Root ----- */
@@ -1016,28 +1024,28 @@ static void on_activate(AdwApplication *app, gpointer)
     AdwNavigationPage *main_page = adw_navigation_page_new(GTK_WIDGET(toolbar_view), APP_NAME);
     adw_navigation_view_push(nav_view, main_page);
 
-    /* --- Hamburger‑Button innerhalb der Headerbar --- */
-    GtkMenuButton *menu_btn = GTK_MENU_BUTTON(gtk_menu_button_new());
-    gtk_menu_button_set_icon_name(menu_btn, "open-menu-symbolic");
-    adw_header_bar_pack_start(header, GTK_WIDGET(menu_btn));
+    /* --- Hamburger-Button innerhalb der Headerbar --- */
+    GtkMenuButton *menu_button = GTK_MENU_BUTTON(gtk_menu_button_new());
+    gtk_menu_button_set_icon_name(menu_button, "open-menu-symbolic");
+    adw_header_bar_pack_start(header, GTK_WIDGET(menu_button)); // Linksbündig(start) der Header-Bar zufügen
 
-    /* --- Popover‑Menu im Hamburger --- */
+    /* --- Popover-Menu im Hamburger --- */
     GMenu *menu = g_menu_new();
     g_menu_append(menu, _("Einstellungen     "), "app.show-settings");
     g_menu_append(menu, _("Infos zu Finden   "), "app.show-about");
-    GtkPopoverMenu *popover = GTK_POPOVER_MENU(
+    GtkPopoverMenu *menu_popover = GTK_POPOVER_MENU(
     gtk_popover_menu_new_from_model(G_MENU_MODEL(menu)));
-    gtk_menu_button_set_popover(menu_btn, GTK_WIDGET(popover));
+    gtk_menu_button_set_popover(menu_button, GTK_WIDGET(menu_popover));
 
     /* --- Action die den About‑Dialog öffnet --- */
     const GActionEntry about_entry[] = {
-     { "show-about", show_about, NULL, NULL, NULL }
+        { "show-about", show_about, NULL, NULL, NULL }
     };
     g_action_map_add_action_entries(G_ACTION_MAP(app), about_entry, G_N_ELEMENTS(about_entry), app);
 
     /* --- Action die die Einstellungen öffnet --- */
     const GActionEntry settings_entry[] = {
-     { "show-settings", show_settings, NULL, NULL, NULL }
+        { "show-settings", show_settings, NULL, NULL, NULL }
     }; 
     g_action_map_add_action_entries(G_ACTION_MAP(app), settings_entry, G_N_ELEMENTS(settings_entry), nav_view);
 
@@ -1119,9 +1127,70 @@ static void on_activate(AdwApplication *app, gpointer)
     gtk_check_button_set_active(GTK_CHECK_BUTTON(root_check), FALSE);
     gtk_box_append(GTK_BOX(vbox_inside_right), root_check);
 
+    /* ----- 2. Rechte innere Box für Hilfebutton  --------------------------------- */
+    GtkWidget *vbox_inside_right2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_hexpand(vbox_inside_right2, FALSE);
+    gtk_widget_set_vexpand(vbox_inside_right2, FALSE);
+    gtk_widget_set_halign(vbox_inside_right2, GTK_ALIGN_START);
+
+    /* --- Hilfe-Button in der CheckboxBOX --- */
+    GtkWidget *help_button = gtk_menu_button_new();
+    gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(help_button), "help-about-symbolic");
+    gtk_widget_add_css_class(help_button, "circular");
+    gtk_widget_add_css_class(help_button, "flat");
+    gtk_box_append(GTK_BOX(vbox_inside_right2), help_button);
+
+    /* ---- Popover --------------------------------------------------------------- */
+    GtkWidget *help_popover = gtk_popover_new();
+    /* Scroll-Container und Content-BOX erstellen */
+    GtkWidget *scrolled = gtk_scrolled_window_new();
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+    gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(scrolled), 420);
+    GtkWidget *content_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    gtk_widget_set_size_request(content_box, 380, -1);
+    /* Popover erstellen */
+    GtkWidget *title = gtk_label_new(_("Suchoptionen"));
+    gtk_widget_add_css_class(title, "title-4");
+    gtk_label_set_xalign(GTK_LABEL(title), 0.0);
+    gtk_box_append(GTK_BOX(content_box), title);
+    /* Hilfe-Texte */
+    GtkWidget *help_text = gtk_label_new(
+        _("Erweiterte Anpassung der Suche\n\n"
+        "• <b>Exakte Übereinstimmung:</b>\n"
+        "Sucht nach der genauen Schreibweise des Suchbegriffs.\n"
+        "• <b>Suche im System-Pfad:</b>\n"
+        "Durchsucht das System ab dem Wurzelverzeichnis \"/\".\n"
+        "• <b>Snapshots ignorieren:</b>\n"
+        "Schließt das Verzeichnis \"/.snapshots\" von der Suche aus.\n"
+        "• <b>Flatpak ignorieren:</b>\n"
+        "Schließt alle Flatpak-Verzeichnisse von der Suche aus.\n"
+        "<b>Hinweis</b>, folgenden Verzeichnisse werden immer ausgeschlossen:\n"
+        "\"/proc\", \"/run\",\n"
+        "\"~/.local/share/containers\" und\n"
+        "\"~/.local/share/Trash\".\n\n")
+        );
+    gtk_label_set_use_markup(GTK_LABEL(help_text), TRUE); // Markup anwenden
+    gtk_label_set_wrap(GTK_LABEL(help_text), TRUE);
+    gtk_label_set_wrap_mode(GTK_LABEL(help_text), PANGO_WRAP_WORD_CHAR);
+    gtk_label_set_xalign(GTK_LABEL(help_text), 0.0);
+    gtk_label_set_max_width_chars(GTK_LABEL(help_text), 50);
+    gtk_widget_set_hexpand(help_text, TRUE); // Breite
+    gtk_box_append(GTK_BOX(content_box), help_text);
+    /* BOX Abstände */
+    gtk_widget_set_margin_top   (content_box, 12);
+    gtk_widget_set_margin_bottom(content_box, 12);
+    gtk_widget_set_margin_start (content_box, 12);
+    gtk_widget_set_margin_end   (content_box, 12);
+    /* Zusammensetzen */
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(scrolled), content_box);
+    gtk_popover_set_child(GTK_POPOVER(help_popover), scrolled);
+    /* Popover an Button binden */
+    gtk_menu_button_set_popover(GTK_MENU_BUTTON(help_button), help_popover);
+
     /* ------ Innere Boxen in die Checkboxen-Haupt-Box einfügen ------------------------- */
     gtk_box_append(GTK_BOX(cb_hbox), vbox_inside_left);
     gtk_box_append(GTK_BOX(cb_hbox), vbox_inside_right);
+    gtk_box_append(GTK_BOX(cb_hbox), vbox_inside_right2);
     gtk_box_append(GTK_BOX(mainbox), cb_hbox);
 
     /* --- Kontext-Struct-Block für die Initialisierung einer UI-Referenzstruktur --- */
