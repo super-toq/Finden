@@ -195,9 +195,10 @@ static void show_about(GSimpleAction *action, GVariant *parameter, gpointer user
 /* ----- Hife Popover ------------------------------------------------------------------- */
 static void on_help_button_clicked(GtkButton *button, gpointer user_data)
 {
-
+    /* Fokus zurück auf das Suchfeld, gilt für alle Checkboxen */
+    UiRefs *refs = user_data;
+    gtk_widget_grab_focus(GTK_WIDGET(refs->search_entry));
 }   // Ende Help-Button
-
 
 
 /* ----- In Einstellungen: Schalter1-Toggle --------------------------------------------- */
@@ -289,7 +290,8 @@ static void show_settings(GSimpleAction *action, GVariant *parameter, gpointer u
     /* ----- NavigationPage anlegen ----- */
     AdwNavigationPage *settings_page = 
                       adw_navigation_page_new(GTK_WIDGET(settings_toolbar), _("Einstellungen"));
-    gtk_widget_set_size_request(GTK_WIDGET(settings_page), 510, 250);
+    /* ----- Größe nur zum Ausgleichen der Textlänge bei "Große Schrift" ----- */
+    gtk_widget_set_size_request(GTK_WIDGET(settings_page), 560, 252);
 
     /* ----- Page der Settings_nav hinzufügen ----- */
     adw_navigation_view_push(settings_nav, settings_page);
@@ -1003,7 +1005,7 @@ static void on_activate(AdwApplication *app, gpointer)
     AdwApplicationWindow *adw_win = ADW_APPLICATION_WINDOW(adw_application_window_new(GTK_APPLICATION(app))); 
 
     gtk_window_set_title(GTK_WINDOW(adw_win), APP_NAME);            // WM-Titel
-    gtk_window_set_default_size(GTK_WINDOW(adw_win), 560, 250);     // Standard-Fenstergröße
+    gtk_window_set_default_size(GTK_WINDOW(adw_win), 560, 252);     // Standard-Fenstergröße (560px)
     gtk_window_set_resizable(GTK_WINDOW(adw_win), FALSE);           // Skalierung nicht erlauben
 
     /* --- Navigation Root ----- */
@@ -1088,13 +1090,10 @@ static void on_activate(AdwApplication *app, gpointer)
     /* --- Horizontales Haupt-Box-Widget für Checkboxen erstellen ----------------------- */
     GtkWidget *cb_hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 12);
     gtk_widget_set_hexpand(cb_hbox, TRUE);          // Ausdehnung in die Breite
-    gtk_widget_set_halign(cb_hbox, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(cb_hbox, GTK_ALIGN_START);
 
     /* ----- Linke innere vertikale Box für Checkboxen ---------------------------------- */
-    GtkWidget *vbox_inside_left = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
-    gtk_widget_set_hexpand(vbox_inside_left, FALSE);    // Ausdehnung in die Breite
-    gtk_widget_set_halign(vbox_inside_left, GTK_ALIGN_START);
+    GtkWidget *vbox_inside_left = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6); // zwischen den cbxen
+    gtk_widget_set_hexpand(vbox_inside_left, FALSE);                  // Ausdehnung in die Breite
 
     /* --- (1.)Kontrallkästchen/Checkbox "snapshots ignorieren" erstellen --- */
     GtkWidget *snapshots_check = gtk_check_button_new_with_label(_("Snapshots ignorieren"));
@@ -1111,9 +1110,8 @@ static void on_activate(AdwApplication *app, gpointer)
     gtk_box_append(GTK_BOX(vbox_inside_left), flatpak_check);
 
     /* ----- Rechte innere vertikale Box für Checkboxen --------------------------------- */
-    GtkWidget *vbox_inside_right = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
+    GtkWidget *vbox_inside_right = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6); // zwischen den cbxen
     gtk_widget_set_hexpand(vbox_inside_right, FALSE);
-    gtk_widget_set_halign(vbox_inside_right, GTK_ALIGN_START);
 
     /* --- (3.)Kontrollkästchen/Checkbox mit Namen "exact match" erstellen --- */
     GtkWidget *exact_check = gtk_check_button_new_with_label(_("Exakte Übereinstimmung"));
@@ -1127,17 +1125,22 @@ static void on_activate(AdwApplication *app, gpointer)
     gtk_check_button_set_active(GTK_CHECK_BUTTON(root_check), FALSE);
     gtk_box_append(GTK_BOX(vbox_inside_right), root_check);
 
+    /* Spacer zwischen den VBOXEN */
+    GtkWidget *vbox_spacer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    gtk_widget_set_hexpand(vbox_spacer, TRUE);
+
     /* ----- 2. Rechte innere Box für Hilfebutton  --------------------------------- */
     GtkWidget *vbox_inside_right2 = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_set_hexpand(vbox_inside_right2, FALSE);
-    gtk_widget_set_vexpand(vbox_inside_right2, FALSE);
-    gtk_widget_set_halign(vbox_inside_right2, GTK_ALIGN_START);
+    gtk_widget_set_hexpand(vbox_inside_right2, TRUE);
+    gtk_widget_set_vexpand(vbox_inside_right2, TRUE);
+    gtk_widget_set_halign(vbox_inside_right2, GTK_ALIGN_END);
 
     /* --- Hilfe-Button in der CheckboxBOX --- */
     GtkWidget *help_button = gtk_menu_button_new();
     gtk_menu_button_set_icon_name(GTK_MENU_BUTTON(help_button), "help-about-symbolic");
     gtk_widget_add_css_class(help_button, "circular");
     gtk_widget_add_css_class(help_button, "flat");
+    gtk_widget_set_halign(help_button, GTK_ALIGN_FILL);
     gtk_box_append(GTK_BOX(vbox_inside_right2), help_button);
 
     /* ---- Popover --------------------------------------------------------------- */
@@ -1145,14 +1148,14 @@ static void on_activate(AdwApplication *app, gpointer)
     /* Scroll-Container und Content-BOX erstellen */
     GtkWidget *scrolled = gtk_scrolled_window_new();
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled),GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
-    gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(scrolled), 420);
+    gtk_scrolled_window_set_min_content_height(GTK_SCROLLED_WINDOW(scrolled), 310);
     GtkWidget *content_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-    gtk_widget_set_size_request(content_box, 380, -1);
-    /* Popover erstellen */
-    GtkWidget *title = gtk_label_new(_("Suchoptionen"));
-    gtk_widget_add_css_class(title, "title-4");
-    gtk_label_set_xalign(GTK_LABEL(title), 0.0);
-    gtk_box_append(GTK_BOX(content_box), title);
+    gtk_widget_set_size_request(content_box, 300, -1); // Breite
+    /* Popover erstellen und einsetzen */
+    GtkWidget *content_title = gtk_label_new(_("Suchoptionen"));
+    gtk_widget_add_css_class(content_title, "title-4");
+    gtk_label_set_xalign(GTK_LABEL(content_title), 0.0);
+    gtk_box_append(GTK_BOX(content_box), content_title);
     /* Hilfe-Texte */
     GtkWidget *help_text = gtk_label_new(
         _("Erweiterte Anpassung der Suche\n\n"
@@ -1189,6 +1192,7 @@ static void on_activate(AdwApplication *app, gpointer)
 
     /* ------ Innere Boxen in die Checkboxen-Haupt-Box einfügen ------------------------- */
     gtk_box_append(GTK_BOX(cb_hbox), vbox_inside_left);
+    gtk_box_append(GTK_BOX(cb_hbox), vbox_spacer); // schiebt rechte BOX dynamisch nach rechts
     gtk_box_append(GTK_BOX(cb_hbox), vbox_inside_right);
     gtk_box_append(GTK_BOX(cb_hbox), vbox_inside_right2);
     gtk_box_append(GTK_BOX(mainbox), cb_hbox);
