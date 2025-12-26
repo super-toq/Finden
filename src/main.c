@@ -10,7 +10,7 @@
  *
  *
  */
-#define APP_VERSION    "1.0.1"//_1
+#define APP_VERSION    "1.0.1"//_2
 #define APP_ID         "free.toq.finden"
 #define APP_NAME       "Finden"
 #define APP_DOMAINNAME "toq-finden"
@@ -1007,7 +1007,7 @@ static void on_activate(AdwApplication *app, gpointer)
     /* ----- Adwaita-Fenster ------------------------------------------------------------ */
     AdwApplicationWindow *adw_win = ADW_APPLICATION_WINDOW(adw_application_window_new(GTK_APPLICATION(app))); 
 
-    gtk_window_set_title(GTK_WINDOW(adw_win), APP_NAME);            // WM-Titel
+    gtk_window_set_title(GTK_WINDOW(adw_win), APP_NAME);            // WinManager-Titel
     gtk_window_set_default_size(GTK_WINDOW(adw_win), 560, 252);     // Standard-Fenstergröße (560px)
     gtk_window_set_resizable(GTK_WINDOW(adw_win), FALSE);           // Skalierung nicht erlauben
 
@@ -1171,7 +1171,7 @@ static void on_activate(AdwApplication *app, gpointer)
         "• <b>Flatpak ignorieren:</b>\n"
         "Schließt alle Flatpak-Verzeichnisse von der Suche aus.\n"
         "<b>Hinweis</b>, folgenden Verzeichnisse werden immer ausgeschlossen:\n"
-        "\"/proc\", \"/run\",\n"
+        "\"/proc\", \"/run\", \"/var/lock\"\n"
         "\"~/.local/share/containers\" und\n"
         "\"~/.local/share/Trash\".\n\n")
         );
@@ -1245,6 +1245,8 @@ static void on_activate(AdwApplication *app, gpointer)
 //            g_signal_connect(quit_button, "clicked", G_CALLBACK(on_quitbutton_clicked), app);
       // Nethode um das Fenster zu schließen, egal wieviele Instanzen existieren:
          g_signal_connect(quit_button, "clicked", G_CALLBACK(on_quitbutton_clicked), adw_win);
+    /* Close-request vom "Window-close-button" abfangen und mit meinem Beenden-Handling verbinden */
+    g_signal_connect(adw_win, "close-request", G_CALLBACK(on_quitbutton_clicked), adw_win);
 
     /* ---- Kontrollkästchen Signal verbinden ---- */
     // Toggel für beide Checkboxen, sowie um den Fokus für die Suchleiste wieder neu zu setzen!
