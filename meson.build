@@ -74,17 +74,25 @@ install_data(join_paths(data_dir, 'free.toq.finden.desktop.download'),
 # rename     : 'free.toq.miniterm.desktop')
 
 # Localization files
-# EN 
-po_file_en = join_paths(po_dir, 'toq-finden_en_US.po')
+# EN_US 
+po_file_en_US = join_paths(po_dir, 'toq-finden_en_US.po')
 mo_file = 'toq-finden.mo'
-run_command('msgfmt', po_file_en, '--output-file=' + join_paths('en_US.mo'), check : true)
+run_command('msgfmt', po_file_en_US, '--output-file=' + join_paths('en_US.mo'), check : true)
 install_data(join_paths( 'en_US.mo'),
   install_dir: join_paths(get_option('prefix'), 'share', 'locale', 'en_US', 'LC_MESSAGES'),
   rename: mo_file
 )
+# EN_EN
+po_file_en_EN = join_paths(po_dir, 'toq-finden_en_EN.po')
+mo_file = 'toq-finden.mo'
+run_command('msgfmt', po_file_en_EN, '--output-file=' + join_paths('en_EN.mo'), check : true)
+install_data(join_paths( 'en_EN.mo'),
+  install_dir: join_paths(get_option('prefix'), 'share', 'locale', 'en_EN', 'LC_MESSAGES'),
+  rename: mo_file
+)
 # PL
-po_file_pl = join_paths(po_dir, 'toq-finden_pl_PL.po')
-run_command('msgfmt', po_file_pl, '--output-file=' + join_paths('pl_PL.mo'), check : true)
+po_file_pl_PL = join_paths(po_dir, 'toq-finden_pl_PL.po')
+run_command('msgfmt', po_file_pl_PL, '--output-file=' + join_paths('pl_PL.mo'), check : true)
 install_data(join_paths( 'pl_PL.mo'),
   install_dir: join_paths(get_option('prefix'), 'share', 'locale', 'pl_PL', 'LC_MESSAGES'),
   rename: mo_file
