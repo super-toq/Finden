@@ -1,5 +1,5 @@
 # meson.build
-# toq 2025-12-22
+# toq 2025-12-31
 # Project definition (App ID)
 project('free.toq.finden', 'c', meson_version: '>= 0.59', 
   default_options: [
@@ -82,12 +82,12 @@ install_data(join_paths( 'en_US.mo'),
   install_dir: join_paths(get_option('prefix'), 'share', 'locale', 'en_US', 'LC_MESSAGES'),
   rename: mo_file
 )
-# EN_EN
-po_file_en_EN = join_paths(po_dir, 'toq-finden_en_EN.po')
+# EN_GB
+po_file_en_GB = join_paths(po_dir, 'toq-finden_en_GB.po')
 mo_file = 'toq-finden.mo'
-run_command('msgfmt', po_file_en_EN, '--output-file=' + join_paths('en_EN.mo'), check : true)
-install_data(join_paths( 'en_EN.mo'),
-  install_dir: join_paths(get_option('prefix'), 'share', 'locale', 'en_EN', 'LC_MESSAGES'),
+run_command('msgfmt', po_file_en_GB, '--output-file=' + join_paths('en_GB.mo'), check : true)
+install_data(join_paths( 'en_GB.mo'),
+  install_dir: join_paths(get_option('prefix'), 'share', 'locale', 'en_GB', 'LC_MESSAGES'),
   rename: mo_file
 )
 # PL
