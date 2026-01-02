@@ -43,12 +43,12 @@ sudo ninja -C _build install
 ```  
 
 ### Uninstall:  
-Go to the download folder from git clone and run the script:  
+Go to the download folder from git clone and run the uninstall script:  
 ```
 ./uninstall.sh 
 ```
   
   
 > [!Note]  
-> ***This code is part of my learning project. Use of the code and execution of the application is at your own risk; I accept no liability!***
+> This code is part of my learning project. Use of the code and execution of the application is at your own risk; I accept no liability!
   
